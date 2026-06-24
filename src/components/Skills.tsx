@@ -49,9 +49,9 @@ export default function Skills() {
     const io = new IntersectionObserver(
       (entries) => entries.forEach((e) => {
         if (e.intersectionRatio >= 0.35) setIsIn(true)
-        else if (e.intersectionRatio <= 0.02) setIsIn(false)
+        else if (e.intersectionRatio <= 0.15) { setIsIn(false); setSelected(null) }
       }),
-      { threshold: [0, 0.35] },
+      { threshold: [0, 0.15, 0.35] },
     )
     io.observe(wrap)
     return () => io.disconnect()
@@ -111,7 +111,9 @@ export default function Skills() {
                 </span>
                 <span className="sk-chips">
                   {chipsOf(s.v).map((t, j) => (
-                    <span className="sk-chip" key={t} style={{ '--j': j } as React.CSSProperties}>{t}</span>
+                    <span className="sk-chip" key={t} style={{ '--j': j } as React.CSSProperties}>
+                      {t}
+                    </span>
                   ))}
                 </span>
               </button>

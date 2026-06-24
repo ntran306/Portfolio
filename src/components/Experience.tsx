@@ -279,7 +279,6 @@ function ExperiencePinned() {
 
       <div className="exp-track" ref={trackRef} style={{ height: `${N * 100 + 100}vh` }}>
         <div className="exp-stage" ref={stageRef}>
-          <span className="exp-eyebrow">{experience.heading}</span>
           <canvas className="exp-wave" ref={canvasRef} aria-hidden="true"></canvas>
 
           <div className="exp-cards">

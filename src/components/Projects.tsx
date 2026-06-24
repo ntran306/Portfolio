@@ -50,12 +50,16 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
       const a = rotation.current + (i / N) * Math.PI * 2
       const x = cx + Math.cos(a) * Rd
       const y = cy + Math.sin(a) * Rd
-      const front = (Math.cos(a) + 1) / 2 // 1 at the right, 0 at the left (behind)
-      const s = 0.55 + front * 0.45
+      const c = Math.cos(a)              // rightness: 1 front, 0 at the edges, -1 behind
+      const front = (c + 1) / 2          // smooth — used for scale + depth order
+      // Opacity falls off sharply at the semicircle edges so cards fade fully
+      // once they pass behind the center.
+      const vis = Math.max(0, Math.min(1, c * 1.85 + 0.22))
+      const s = 0.6 + front * 0.4
       el.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-50%) scale(${s.toFixed(3)})`
-      el.style.opacity = (0.06 + front * 0.94).toFixed(2)
+      el.style.opacity = vis.toFixed(3)
       el.style.zIndex = String(Math.round(front * 100))
-      el.style.pointerEvents = front > 0.72 ? 'auto' : 'none'
+      el.style.pointerEvents = vis > 0.6 ? 'auto' : 'none'
     }
   }
 
@@ -65,9 +69,9 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
     const measure = () => {
       const w = el.clientWidth
       const h = el.clientHeight
-      const cx = Math.min(w * 0.18, 200)
+      const cx = Math.min(w * 0.18, 90)
       const cy = h / 2
-      const Rd = Math.max(140, Math.min(h * 0.48, w - cx - 100))
+      const Rd = Math.max(120, Math.min(h * 0.46, w - cx - 80))
       geom.current = { cx, cy, Rd }
       if (svgRef.current) svgRef.current.setAttribute('viewBox', `0 0 ${w} ${h}`)
       if (arcRef.current) arcRef.current.setAttribute('d', `M${cx},${cy - Rd} A${Rd},${Rd} 0 0 1 ${cx},${cy + Rd}`)
@@ -168,6 +172,20 @@ export default function Projects() {
   const rot = useRef(0)
   const drag = useRef({ active: false, lastAngle: 0, vel: 0 })
   const rafRef = useRef(0)
+  const selectedRef = useRef<number | null>(null)
+  selectedRef.current = selected
+  const lastScrollYRef = useRef(0)
+  const scrollDirRef = useRef(1)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      scrollDirRef.current = currentScrollY > lastScrollYRef.current ? 1 : -1
+      lastScrollYRef.current = currentScrollY
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   useEffect(() => {
     const el = wheelRef.current
@@ -233,6 +251,32 @@ export default function Projects() {
 
   useEffect(() => () => stopMomentum(), [])
 
+  // Intro spin: a quick decaying spin each time the wheel scrolls into view, to
+  // hint that it's draggable. Replays on every re-entry.
+  useEffect(() => {
+    const el = wheelRef.current
+    if (!el) return
+    let wasIn = false
+    const io = new IntersectionObserver((es) => {
+      const isIn = es[0].isIntersecting
+      if (isIn && !wasIn && selectedRef.current === null) {
+        stopMomentum()
+        let v = 12 * scrollDirRef.current
+        const spin = () => {
+          rot.current += v
+          v *= 0.972
+          applyRot()
+          rafRef.current = Math.abs(v) > 0.1 ? requestAnimationFrame(spin) : 0
+        }
+        rafRef.current = requestAnimationFrame(spin)
+      }
+      wasIn = isIn
+    }, { threshold: 0.45 })
+    io.observe(el)
+    return () => io.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const pick = (i: number) => { stopMomentum(); setSelected((prev) => (prev === i ? null : i)) }
 
   return (
@@ -278,11 +322,11 @@ export default function Projects() {
                 </div>
               ))}
             </div>
-          </div>
 
-          {selected !== null && (
-            <ProjectsOrbit key={selected} category={cats[selected]} onClose={() => setSelected(null)} />
-          )}
+            {selected !== null && (
+              <ProjectsOrbit key={selected} category={cats[selected]} onClose={() => setSelected(null)} />
+            )}
+          </div>
         </div>
       </div>
     </section>

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import IsometricGrid from './IsometricGrid'
+import HomeBall from './HomeBall'
 import { hero, links } from '../content'
 
 export default function Home() {
@@ -47,7 +47,7 @@ export default function Home() {
         </div>
       </div>
 
-      <IsometricGrid />
+      <HomeBall />
 
       <div className="home__content wrap">
         <div className="home__card reveal">
