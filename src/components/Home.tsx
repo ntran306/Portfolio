@@ -43,7 +43,6 @@ export default function Home() {
           <div className="bg-3d__layer bg-3d__layer--a"></div>
           <div className="bg-3d__layer bg-3d__layer--b"></div>
           <div className="bg-3d__layer bg-3d__layer--c"></div>
-          <div className="bg-3d__shine"></div>
         </div>
       </div>
 
@@ -68,7 +67,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="home__fade"></div>
+      <div className="home__fade" aria-hidden="true"></div>
     </section>
   )
 }

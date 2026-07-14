@@ -53,6 +53,10 @@ export interface Project {
   text: string
   tags: string[]
   href: string
+  /** Optional image / gif / video shown beside the project. Videos (.mp4/.webm)
+   *  autoplay muted; anything else renders as an <img>. Falls back to a
+   *  placeholder when omitted. */
+  media?: string
 }
 export interface ProjectCategory {
   name: string

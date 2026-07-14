@@ -38,7 +38,7 @@ export default function Experience() {
 /* ---------- Compact / reduced-motion fallback ---------- */
 function ExperienceList() {
   return (
-    <section id="experience" className="section">
+    <section id="experience" className="section exp-compact">
       <div className="content-wrap">
         <div className="section__head reveal">
           <h2>{experience.heading}</h2>
@@ -270,16 +270,10 @@ function ExperiencePinned() {
   const N = experience.items.length
   return (
     <section id="experience" className="section exp">
-      <div className="content-wrap">
-        <div className="section__head reveal">
-          <h2>{experience.heading}</h2>
-          <p>{experience.scrollHint}</p>
-        </div>
-      </div>
-
       <div className="exp-track" ref={trackRef} style={{ height: `${N * 100 + 100}vh` }}>
         <div className="exp-stage" ref={stageRef}>
           <canvas className="exp-wave" ref={canvasRef} aria-hidden="true"></canvas>
+          <div className="exp-eyebrow" aria-hidden="true">{experience.heading}</div>
 
           <div className="exp-cards">
             {experience.items.map((e, i) => (

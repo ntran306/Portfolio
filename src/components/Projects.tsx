@@ -24,139 +24,110 @@ function makeArcs(R: number): string[] {
   ]
 }
 
-/* ---------- Detail view: projects orbiting a left-anchored circle ---------- */
+/* ---------- Detail view: a left semicircle with fixed diamond markers; a right
+   panel shows the focused project. Scroll over the arc to cycle projects. ---------- */
+const isVideo = (src: string) => /\.(mp4|webm|mov)$/i.test(src)
+
 function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClose: () => void }) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
   const arcRef = useRef<SVGPathElement>(null)
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([])
-  const rotation = useRef(0)
-  const drag = useRef({ active: false, lastA: 0, vel: 0 })
-  const rafRef = useRef(0)
-  const geom = useRef({ cx: 0, cy: 0, Rd: 0 })
   const N = category.projects.length
-
-  const angleAt = (clientX: number, clientY: number) => {
-    const r = wrapRef.current!.getBoundingClientRect()
-    return Math.atan2(clientY - (r.top + geom.current.cy), clientX - (r.left + geom.current.cx))
-  }
-
-  // Place each card on the circle; the one nearest the right (front) is largest.
-  const layout = () => {
-    const { cx, cy, Rd } = geom.current
-    for (let i = 0; i < N; i++) {
-      const el = cardRefs.current[i]
-      if (!el) continue
-      const a = rotation.current + (i / N) * Math.PI * 2
-      const x = cx + Math.cos(a) * Rd
-      const y = cy + Math.sin(a) * Rd
-      const c = Math.cos(a)              // rightness: 1 front, 0 at the edges, -1 behind
-      const front = (c + 1) / 2          // smooth — used for scale + depth order
-      // Opacity falls off sharply at the semicircle edges so cards fade fully
-      // once they pass behind the center.
-      const vis = Math.max(0, Math.min(1, c * 1.85 + 0.22))
-      const s = 0.6 + front * 0.4
-      el.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-50%) scale(${s.toFixed(3)})`
-      el.style.opacity = vis.toFixed(3)
-      el.style.zIndex = String(Math.round(front * 100))
-      el.style.pointerEvents = vis > 0.6 ? 'auto' : 'none'
-    }
-  }
+  const [active, setActive] = useState(0)
+  const activeRef = useRef(0)
+  const [positions, setPositions] = useState<Array<{ x: number; y: number }>>([])
 
   useEffect(() => {
     const el = wrapRef.current
     if (!el) return
+
+    // Spread diamonds evenly along the right semicircle arc, capped at ±80°.
+    const spread = N <= 1 ? 0 : Math.min(80, 45 * (N - 1))
+
     const measure = () => {
       const w = el.clientWidth
       const h = el.clientHeight
-      const cx = Math.min(w * 0.18, 90)
+      const cx = Math.min(w * 0.13, 100)
       const cy = h / 2
-      const Rd = Math.max(120, Math.min(h * 0.46, w - cx - 80))
-      geom.current = { cx, cy, Rd }
-      if (svgRef.current) svgRef.current.setAttribute('viewBox', `0 0 ${w} ${h}`)
-      if (arcRef.current) arcRef.current.setAttribute('d', `M${cx},${cy - Rd} A${Rd},${Rd} 0 0 1 ${cx},${cy + Rd}`)
-      layout()
+      const Rd = Math.max(110, Math.min(h * 0.4, 150))
+      svgRef.current?.setAttribute('viewBox', `0 0 ${w} ${h}`)
+      arcRef.current?.setAttribute('d', `M${cx},${cy - Rd} A${Rd},${Rd} 0 0 1 ${cx},${cy + Rd}`)
+      setPositions(
+        Array.from({ length: N }, (_, i) => {
+          const deg = N === 1 ? 0 : -spread + (i / (N - 1)) * 2 * spread
+          const a = (deg * Math.PI) / 180
+          return { x: cx + Rd * Math.cos(a), y: cy + Rd * Math.sin(a) }
+        })
+      )
     }
     measure()
     const ro = new ResizeObserver(measure)
     ro.observe(el)
 
-    // Scroll over the orbit rotates it (non-passive so we can preventDefault).
+    // Scroll on the arc side cycles through diamonds; right panel side scrolls page.
     const onWheel = (e: WheelEvent) => {
+      const detail = el.querySelector('.proj-orbit__detail') as HTMLElement | null
+      if (detail && e.clientX >= detail.getBoundingClientRect().left) return
       e.preventDefault()
-      rotation.current += e.deltaY * 0.0026
-      layout()
+      const next = Math.max(0, Math.min(N - 1, activeRef.current + (e.deltaY > 0 ? 1 : -1)))
+      if (next !== activeRef.current) { activeRef.current = next; setActive(next) }
     }
     el.addEventListener('wheel', onWheel, { passive: false })
 
-    return () => {
-      ro.disconnect()
-      el.removeEventListener('wheel', onWheel)
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => { ro.disconnect(); el.removeEventListener('wheel', onWheel) }
   }, [N])
 
-  const onDown = (e: React.PointerEvent) => {
-    if ((e.target as HTMLElement).closest('.proj-orbit__center, a')) return
-    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0 }
-    drag.current = { active: true, lastA: angleAt(e.clientX, e.clientY), vel: 0 }
-    try { wrapRef.current!.setPointerCapture(e.pointerId) } catch { /* synthetic */ }
-  }
-  const onMove = (e: React.PointerEvent) => {
-    if (!drag.current.active) return
-    const a = angleAt(e.clientX, e.clientY)
-    let d = a - drag.current.lastA
-    if (d > Math.PI) d -= Math.PI * 2
-    if (d < -Math.PI) d += Math.PI * 2
-    rotation.current += d
-    drag.current.vel = d
-    drag.current.lastA = a
-    layout()
-  }
-  const onUp = (e: React.PointerEvent) => {
-    if (!drag.current.active) return
-    drag.current.active = false
-    try { wrapRef.current!.releasePointerCapture(e.pointerId) } catch { /* already released */ }
-    const spin = () => {
-      rotation.current += drag.current.vel
-      drag.current.vel *= 0.97
-      layout()
-      rafRef.current = Math.abs(drag.current.vel) > 0.0008 ? requestAnimationFrame(spin) : 0
-    }
-    if (Math.abs(drag.current.vel) > 0.0008) rafRef.current = requestAnimationFrame(spin)
-  }
+  const project = category.projects[active] ?? category.projects[0]
 
   return (
-    <div
-      className="proj-orbit"
-      ref={wrapRef}
-      onPointerDown={onDown}
-      onPointerMove={onMove}
-      onPointerUp={onUp}
-      onPointerCancel={onUp}
-      role="dialog"
-      aria-label={category.name}
-    >
+    <div className="proj-orbit" ref={wrapRef} role="dialog" aria-label={category.name}>
       <svg className="proj-orbit__arc" ref={svgRef} aria-hidden="true">
         <path ref={arcRef} className="proj-orbit__arcline" />
       </svg>
 
+      {/* Center label — click to return to the category wheel. */}
       <button className="proj-orbit__center" onClick={onClose}>
         <span className="proj-orbit__title">{category.name}</span>
         <span className="proj-orbit__back">← back</span>
       </button>
 
-      {category.projects.map((p, i) => (
-        <div className="proj-orbit__card" key={p.title} ref={(el) => { cardRefs.current[i] = el }}>
-          <a className="proj-orbit__link" href={p.href} target="_blank" rel="noreferrer">
-            <span className="pill">{p.pill}</span>
-            <span className="proj-orbit__name">{p.title}</span>
-            <span className="proj-orbit__text">{p.text}</span>
-            <span className="tags">{p.tags.map((t) => <span key={t} className="tag">{t}</span>)}</span>
+      {/* Fixed diamond markers along the arc — one per project. */}
+      {positions.map((pos, i) => (
+        <button
+          key={category.projects[i].title}
+          className={`proj-orbit__diamond${i === active ? ' is-active' : ''}`}
+          style={{ left: pos.x, top: pos.y }}
+          onClick={() => { activeRef.current = i; setActive(i) }}
+          aria-label={category.projects[i].title}
+          title={category.projects[i].title}
+        />
+      ))}
+
+      {N > 1 && <div className="proj-orbit__scroll-hint" aria-hidden="true">scroll ↑↓</div>}
+
+      {/* Detail + media; re-keyed to replay the fade on project change. */}
+      <div className="proj-orbit__detail" key={active}>
+        <div className="proj-orbit__detail-body">
+          <h3 className="proj-orbit__name">{project.title}</h3>
+          <p className="proj-orbit__text">{project.text}</p>
+          <div className="tags">{project.tags.map((t) => <span key={t} className="tag">{t}</span>)}</div>
+          <a className="btn btn--primary proj-orbit__cta" href={project.href} target="_blank" rel="noreferrer">
+            View project →
           </a>
         </div>
-      ))}
+        <div className="proj-orbit__media">
+          {project.media ? (
+            isVideo(project.media)
+              ? <video src={project.media} autoPlay loop muted playsInline />
+              : <img src={project.media} alt={project.title} loading="lazy" />
+          ) : (
+            <div className="proj-orbit__media-ph" aria-hidden="true">
+              <span>▶</span>
+              <span className="proj-orbit__media-ph-label">image / gif / video</span>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -322,11 +293,11 @@ export default function Projects() {
                 </div>
               ))}
             </div>
-
-            {selected !== null && (
-              <ProjectsOrbit key={selected} category={cats[selected]} onClose={() => setSelected(null)} />
-            )}
           </div>
+
+          {selected !== null && (
+            <ProjectsOrbit key={selected} category={cats[selected]} onClose={() => setSelected(null)} />
+          )}
         </div>
       </div>
     </section>
