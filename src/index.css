@@ -647,10 +647,13 @@ section.exp{ padding: 0; }
   transform: rotate(-45deg); color: var(--muted); font-size: 14px; font-weight: 600;
   background: linear-gradient(135deg, rgba(106,166,255,.08), rgba(127,220,255,.05));
 }
-/* Fills the tile's local (unrotated) square exactly, so it rotates as one rigid
-   unit with the diamond frame — no counter-rotation, which would otherwise leave
-   gaps at the frame's corners once the whole tile spins 45deg for display. */
-.photo-diamond__img{ position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+/* The tile itself is rotated 45deg, so the photo must counter-rotate to read
+   upright; the √2 scale re-covers the corners the counter-rotation exposes. */
+.photo-diamond__img{
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transform: rotate(-45deg) scale(1.45);
+}
 
 /* Loader */
 .loader{

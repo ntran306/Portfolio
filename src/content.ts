@@ -30,6 +30,7 @@ export const about = {
   photos: [
     'assets/IMG_6414.jpg',
     'assets/IMG_6674.jpg',
+    'assets/IMG_4384.png',
   ],
 }
 
@@ -43,15 +44,13 @@ export interface Experience {
 
 export const experience = {
   heading: 'Experience',
-  subhead: 'Research, fullstack builds, and games — the last few years.', // shown on mobile / reduced-motion
+  subhead: "Where I've worked and what I've led.", // shown on mobile / reduced-motion
   scrollHint: 'Scroll to travel the timeline.', // shown under the pinned heading
   // ➕ Add a new experience: copy one block, edit it, drop it in (newest first).
   items: [
-    { title: 'Georgia Tech VIP — Undergraduate Researcher', year: '2025 – Present', text: 'Researching how VR, AI, and robotics can improve safety and learning in construction — 6+ interactive Unity environments, cross-platform VR support, and a pipeline holding 90+ FPS.', tags: ['Unity', 'VR', 'AI', 'Robotics'] },
-    { title: 'BuzzedIn — Fullstack Developer', year: '2025 – Present', text: 'Building a job-matching platform for job seekers and recruiters — 5+ integrated APIs and dynamic filtering that lifted engagement over 30%.', tags: ['Fullstack', 'APIs', 'UX'] },
-    { title: 'Tutortle — Lead Fullstack Engineer', year: '2025 – Present', text: 'Leading development of a location-based tutoring platform — real-time distance APIs and in-app messaging that sped up tutor-student matching by 40%.', tags: ['Fullstack', 'APIs', 'Leadership'] },
-    { title: 'Chime — Programmer & 3D Artist', year: '2024', text: 'Built core Unity gameplay systems and roguelike progression, modeled and rigged 7+ NPCs/assets in Blender, and ran 50+ playtests ahead of the VGDev Fall demo.', tags: ['Unity', 'Blender', 'Game Design'] },
-    { title: 'The Known World — Technical Director', year: '2023 – Present', text: 'Solo-developing a game from the ground up — coding, modeling, and animating movement systems, and optimizing rendering to cut CPU load by 20%.', tags: ['Game Dev', 'Solo Project'] },
+    { title: 'Georgia Tech VIP — Undergraduate Researcher', year: '2025 – Present', text: 'Researching how VR, AI, and robotics can improve safety and learning in construction — building 6+ interactive Unity environments with cross-platform VR support at a stable 90+ FPS.', tags: ['Unity', 'VR', 'AI', 'Research'] },
+    { title: 'Viet Home Care LLC — Caregiver', year: '2025 – Present', text: 'Providing in-home nursing support — diet monitoring, mobility assistance, and technological aid — with the consistent communication and companionship that keep clients comfortable and independent.', tags: ['Caregiving', 'Communication'] },
+    { title: "St. Mary's Academy — Swim Instructor & Varsity Captain", year: '2020 – 2024', text: 'Led the varsity team to state-level championships 4 years in a row, grew membership over 200%, and coached 30+ swimmers from elementary through high school.', tags: ['Leadership', 'Coaching'] },
   ] satisfies Experience[],
 }
 

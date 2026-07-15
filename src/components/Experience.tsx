@@ -21,13 +21,17 @@ const LAYERS: WaveLayer[] = [
 ]
 const MAIN = LAYERS[LAYERS.length - 1]
 
+const COMPACT_QUERY = '(max-width: 820px), (prefers-reduced-motion: reduce)'
+
 export default function Experience() {
-  const [compact, setCompact] = useState(false)
+  // Lazy init so the first render already picks the right variant — starting
+  // at `false` and flipping in an effect would swap in DOM that mount-time
+  // observers (useReveal) never saw.
+  const [compact, setCompact] = useState(() => window.matchMedia(COMPACT_QUERY).matches)
 
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 820px), (prefers-reduced-motion: reduce)')
+    const mq = window.matchMedia(COMPACT_QUERY)
     const update = () => setCompact(mq.matches)
-    update()
     mq.addEventListener('change', update)
     return () => mq.removeEventListener('change', update)
   }, [])
