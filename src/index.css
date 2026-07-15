@@ -654,6 +654,12 @@ section.exp{ padding: 0; }
   object-fit: cover; display: block;
   transform: rotate(-45deg) scale(1.45);
 }
+/* Per-photo framing nudges to keep faces in view. The tile's axes are rotated
+   +45°, so a screen-right shift is translate(+x, −x) in local space (and
+   screen-left is the mirror); the larger scale re-covers the corners the
+   shift would otherwise expose. */
+.photo-diamond--2 .photo-diamond__img{ transform: translate(7%, -7%) rotate(-45deg) scale(1.7); }
+.photo-diamond--3 .photo-diamond__img{ transform: translate(-7%, 7%) rotate(-45deg) scale(1.7); }
 
 /* Loader */
 .loader{

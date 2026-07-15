@@ -64,13 +64,29 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
     const ro = new ResizeObserver(measure)
     ro.observe(el)
 
-    // Scroll on the arc side cycles through diamonds; right panel side scrolls page.
+    // Scroll on the arc side steps through projects; the right panel side — and
+    // scrolling past either end — falls through to normal page scroll, so the
+    // orbit never traps the page. Deltas accumulate so a wheel notch or trackpad
+    // flick is one clean step, and a short cooldown keeps a single gesture from
+    // skipping through several projects mid-animation.
+    let acc = 0
+    let coolUntil = 0
     const onWheel = (e: WheelEvent) => {
       const detail = el.querySelector('.proj-orbit__detail') as HTMLElement | null
       if (detail && e.clientX >= detail.getBoundingClientRect().left) return
+      const dir = e.deltaY > 0 ? 1 : -1
+      const next = activeRef.current + dir
+      if (next < 0 || next >= N) return // at the ends: let the page scroll
       e.preventDefault()
-      const next = Math.max(0, Math.min(N - 1, activeRef.current + (e.deltaY > 0 ? 1 : -1)))
-      if (next !== activeRef.current) { activeRef.current = next; setActive(next) }
+      const now = performance.now()
+      if (now < coolUntil) return
+      if ((acc > 0) !== (e.deltaY > 0)) acc = 0 // direction flip resets the gesture
+      acc += e.deltaY
+      if (Math.abs(acc) < 60) return
+      acc = 0
+      coolUntil = now + 350
+      activeRef.current = next
+      setActive(next)
     }
     el.addEventListener('wheel', onWheel, { passive: false })
 
