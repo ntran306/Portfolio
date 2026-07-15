@@ -24,41 +24,32 @@ function makeArcs(R: number): string[] {
   ]
 }
 
-/* ---------- Detail view: a left semicircle with fixed diamond markers; a right
-   panel shows the focused project. Scroll over the arc to cycle projects. ---------- */
+/* ---------- Detail view: a left semicircle dial; a right panel shows the
+   focused project. Scrolling (or clicking a diamond) rotates the whole
+   constellation so the active project glides along the arc to its apex. ---------- */
 const isVideo = (src: string) => /\.(mp4|webm|mov)$/i.test(src)
 
 function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClose: () => void }) {
   const wrapRef = useRef<HTMLDivElement>(null)
-  const svgRef = useRef<SVGSVGElement>(null)
-  const arcRef = useRef<SVGPathElement>(null)
   const N = category.projects.length
   const [active, setActive] = useState(0)
   const activeRef = useRef(0)
-  const [positions, setPositions] = useState<Array<{ x: number; y: number }>>([])
+  const [dir, setDir] = useState(1) // last step direction — slides the detail panel to match
+  const [geom, setGeom] = useState({ w: 0, h: 0, cx: 0, cy: 0, Rd: 0 })
 
   useEffect(() => {
     const el = wrapRef.current
     if (!el) return
 
-    // Spread diamonds evenly along the right semicircle arc, capped at ±80°.
-    const spread = N <= 1 ? 0 : Math.min(80, 45 * (N - 1))
-
     const measure = () => {
       const w = el.clientWidth
       const h = el.clientHeight
-      const cx = Math.min(w * 0.13, 100)
-      const cy = h / 2
-      const Rd = Math.max(110, Math.min(h * 0.4, 150))
-      svgRef.current?.setAttribute('viewBox', `0 0 ${w} ${h}`)
-      arcRef.current?.setAttribute('d', `M${cx},${cy - Rd} A${Rd},${Rd} 0 0 1 ${cx},${cy + Rd}`)
-      setPositions(
-        Array.from({ length: N }, (_, i) => {
-          const deg = N === 1 ? 0 : -spread + (i / (N - 1)) * 2 * spread
-          const a = (deg * Math.PI) / 180
-          return { x: cx + Rd * Math.cos(a), y: cy + Rd * Math.sin(a) }
-        })
-      )
+      setGeom({
+        w, h,
+        cx: Math.min(w * 0.13, 100),
+        cy: h / 2,
+        Rd: Math.max(110, Math.min(h * 0.4, 150)),
+      })
     }
     measure()
     const ro = new ResizeObserver(measure)
@@ -68,14 +59,14 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
     // scrolling past either end — falls through to normal page scroll, so the
     // orbit never traps the page. Deltas accumulate so a wheel notch or trackpad
     // flick is one clean step, and a short cooldown keeps a single gesture from
-    // skipping through several projects mid-animation.
+    // skipping through several projects mid-glide.
     let acc = 0
     let coolUntil = 0
     const onWheel = (e: WheelEvent) => {
       const detail = el.querySelector('.proj-orbit__detail') as HTMLElement | null
       if (detail && e.clientX >= detail.getBoundingClientRect().left) return
-      const dir = e.deltaY > 0 ? 1 : -1
-      const next = activeRef.current + dir
+      const d = e.deltaY > 0 ? 1 : -1
+      const next = activeRef.current + d
       if (next < 0 || next >= N) return // at the ends: let the page scroll
       e.preventDefault()
       const now = performance.now()
@@ -86,6 +77,7 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
       acc = 0
       coolUntil = now + 350
       activeRef.current = next
+      setDir(d)
       setActive(next)
     }
     el.addEventListener('wheel', onWheel, { passive: false })
@@ -94,12 +86,25 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
   }, [N])
 
   const project = category.projects[active] ?? category.projects[0]
+  const { w, h, cx, cy, Rd } = geom
+
+  // The constellation rotates with `active`: the active project sits at the
+  // arc's apex (0°) and neighbors fan out by STEP°, clamped just inside the
+  // semicircle's ends so far-away markers bunch at the poles instead of
+  // leaving the arc. CSS transitions on left/top make each step glide.
+  const STEP = Math.min(55, 160 / Math.max(1, N - 1))
+  const posOf = (i: number) => {
+    const a = (Math.max(-82, Math.min(82, (i - active) * STEP)) * Math.PI) / 180
+    return { x: cx + Rd * Math.cos(a), y: cy + Rd * Math.sin(a) }
+  }
 
   return (
     <div className="proj-orbit" ref={wrapRef} role="dialog" aria-label={category.name}>
-      <svg className="proj-orbit__arc" ref={svgRef} aria-hidden="true">
-        <path ref={arcRef} className="proj-orbit__arcline" />
-      </svg>
+      {Rd > 0 && (
+        <svg className="proj-orbit__arc" viewBox={`0 0 ${w} ${h}`} aria-hidden="true">
+          <path className="proj-orbit__arcline" d={`M${cx},${cy - Rd} A${Rd},${Rd} 0 0 1 ${cx},${cy + Rd}`} />
+        </svg>
+      )}
 
       {/* Center label — click to return to the category wheel. */}
       <button className="proj-orbit__center" onClick={onClose}>
@@ -107,22 +112,26 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
         <span className="proj-orbit__back">← back</span>
       </button>
 
-      {/* Fixed diamond markers along the arc — one per project. */}
-      {positions.map((pos, i) => (
-        <button
-          key={category.projects[i].title}
-          className={`proj-orbit__diamond${i === active ? ' is-active' : ''}`}
-          style={{ left: pos.x, top: pos.y }}
-          onClick={() => { activeRef.current = i; setActive(i) }}
-          aria-label={category.projects[i].title}
-          title={category.projects[i].title}
-        />
-      ))}
+      {/* Diamond markers — one per project, gliding along the arc as `active` moves. */}
+      {Rd > 0 && category.projects.map((p, i) => {
+        const pos = posOf(i)
+        return (
+          <button
+            key={p.title}
+            className={`proj-orbit__diamond${i === active ? ' is-active' : ''}`}
+            style={{ left: pos.x, top: pos.y }}
+            onClick={() => { setDir(i > activeRef.current ? 1 : -1); activeRef.current = i; setActive(i) }}
+            aria-label={p.title}
+            title={p.title}
+          />
+        )
+      })}
 
       {N > 1 && <div className="proj-orbit__scroll-hint" aria-hidden="true">scroll ↑↓</div>}
 
-      {/* Detail + media; re-keyed to replay the fade on project change. */}
-      <div className="proj-orbit__detail" key={active}>
+      {/* Detail + media; re-keyed to replay the entrance, sliding from the
+          direction of travel. */}
+      <div className="proj-orbit__detail" key={active} style={{ '--slide': `${dir * 18}px` } as React.CSSProperties}>
         <div className="proj-orbit__detail-body">
           <h3 className="proj-orbit__name">{project.title}</h3>
           <p className="proj-orbit__text">{project.text}</p>

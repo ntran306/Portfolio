@@ -379,13 +379,16 @@ section.exp{ padding: 0; }
   fill: none; stroke: rgba(127,220,255,.28); stroke-width: 1.5; stroke-linecap: round;
   filter: drop-shadow(0 0 6px rgba(127,220,255,.3));
 }
-/* Fixed-position diamond markers along the orbit arc */
+/* Diamond markers gliding along the orbit arc — left/top are animated so each
+   step swings the constellation around the dial with a springy settle. */
 .proj-orbit__diamond{
   position: absolute; width: 18px; height: 18px; z-index: 6; padding: 0;
   background: rgba(255,255,255,.05); border: 1.5px solid rgba(106,166,255,.5);
   border-radius: 3px; cursor: pointer;
   transform: translate(-50%,-50%) rotate(45deg);
-  transition: background .25s ease, box-shadow .3s ease, border-color .25s ease, transform .3s cubic-bezier(0.34,1.56,0.64,1);
+  transition: background .25s ease, box-shadow .3s ease, border-color .25s ease,
+    transform .3s cubic-bezier(0.34,1.56,0.64,1),
+    left .55s cubic-bezier(0.34,1.56,0.64,1), top .55s cubic-bezier(0.34,1.56,0.64,1);
 }
 .proj-orbit__diamond:hover{
   background: rgba(106,166,255,.22); border-color: var(--blue2);
@@ -413,7 +416,9 @@ section.exp{ padding: 0; }
   align-items: center; gap: clamp(20px, 3vw, 44px);
   animation: projDetailIn .45s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
-@keyframes projDetailIn{ from{ opacity: 0; transform: translateY(8px); } to{ opacity: 1; transform: none; } }
+/* --slide is set inline per step: +18px when moving down the list, -18px when
+   moving up, so the panel enters from the direction of travel. */
+@keyframes projDetailIn{ from{ opacity: 0; transform: translateY(var(--slide, 8px)); } to{ opacity: 1; transform: none; } }
 .proj-orbit__detail-body{ display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
 .proj-orbit__name{ margin: 0; font-weight: 800; font-size: clamp(20px, 2.6vw, 28px); line-height: 1.15; text-shadow: 0 0 22px rgba(127,220,255,.4); }
 .proj-orbit__text{ margin: 0; color: var(--muted); font-size: 15px; line-height: 1.6; }
@@ -656,10 +661,11 @@ section.exp{ padding: 0; }
 }
 /* Per-photo framing nudges to keep faces in view. The tile's axes are rotated
    +45°, so a screen-right shift is translate(+x, −x) in local space (and
-   screen-left is the mirror); the larger scale re-covers the corners the
-   shift would otherwise expose. */
-.photo-diamond--2 .photo-diamond__img{ transform: translate(7%, -7%) rotate(-45deg) scale(1.7); }
-.photo-diamond--3 .photo-diamond__img{ transform: translate(-7%, 7%) rotate(-45deg) scale(1.7); }
+   screen-left is the mirror). Scale stays near the √2 coverage floor to keep
+   the photos as zoomed-out as the diamond crop allows; vertical framing is
+   recovered with object-position, which costs no zoom. */
+.photo-diamond--2 .photo-diamond__img{ transform: translate(3%, -3%) rotate(-45deg) scale(1.52); object-position: 50% 30%; }
+.photo-diamond--3 .photo-diamond__img{ transform: translate(-3%, 3%) rotate(-45deg) scale(1.52); }
 
 /* Loader */
 .loader{
