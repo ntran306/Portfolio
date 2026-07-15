@@ -9,7 +9,7 @@
 export const hero = {
   greeting: "Hi, I'm",
   name: 'Nathan Tran',
-  tagline: 'Developer passionate about creating interactive experiences through games, web, and XR.',
+  tagline: 'CS student at Georgia Tech building interactive experiences across games, web, and XR — with research in AI-driven robotics.',
 }
 
 /* ---------- Links (used by the hero buttons AND the Contact section) ---------- */
@@ -24,7 +24,13 @@ export const links = {
 export const about = {
   heading: 'About',
   subhead: 'A little bit about me.',
-  bio: "Write 4–6 sentences: what you're into, what you're building, and what you want next. Keep it simple and confident.",
+  bio: "I'm a Computer Science student at Georgia Tech (Class of 2027, GPA 3.82) minoring in FinTech, focused on building interactive systems that span game development, fullstack web, and VR/robotics research. Right now I'm splitting time between a VR + AI research project, two fullstack products, and a solo game I've been building since 2023. Outside of class, I'm part of VGDev (GT's Video Game Development Club) and GT Swim Club, and I spend my free time on calisthenics, bouldering, piano, and probably too much UFC. Always looking for the next thing to build.",
+  // ➕ Add up to 3 photos (paths under public/, e.g. 'assets/name.jpg'). Fewer
+  // than 3 leaves the remaining diamond(s) as a placeholder.
+  photos: [
+    'assets/IMG_6414.jpg',
+    'assets/IMG_6674.jpg',
+  ],
 }
 
 /* ---------- Experience ---------- */
@@ -37,12 +43,15 @@ export interface Experience {
 
 export const experience = {
   heading: 'Experience',
-  subhead: "A timeline of what I've done.", // shown on mobile / reduced-motion
+  subhead: 'Research, fullstack builds, and games — the last few years.', // shown on mobile / reduced-motion
   scrollHint: 'Scroll to travel the timeline.', // shown under the pinned heading
   // ➕ Add a new experience: copy one block, edit it, drop it in (newest first).
   items: [
-    { title: 'Company — Role', year: '2025', text: 'Impact line. Result. Metric if possible.', tags: ['Python', 'Cloud', 'Data'] },
-    { title: 'Research / Club — Title', year: '2024', text: 'What you built / led. Why it mattered.', tags: ['ML', 'Leadership'] },
+    { title: 'Georgia Tech VIP — Undergraduate Researcher', year: '2025 – Present', text: 'Researching how VR, AI, and robotics can improve safety and learning in construction — 6+ interactive Unity environments, cross-platform VR support, and a pipeline holding 90+ FPS.', tags: ['Unity', 'VR', 'AI', 'Robotics'] },
+    { title: 'BuzzedIn — Fullstack Developer', year: '2025 – Present', text: 'Building a job-matching platform for job seekers and recruiters — 5+ integrated APIs and dynamic filtering that lifted engagement over 30%.', tags: ['Fullstack', 'APIs', 'UX'] },
+    { title: 'Tutortle — Lead Fullstack Engineer', year: '2025 – Present', text: 'Leading development of a location-based tutoring platform — real-time distance APIs and in-app messaging that sped up tutor-student matching by 40%.', tags: ['Fullstack', 'APIs', 'Leadership'] },
+    { title: 'Chime — Programmer & 3D Artist', year: '2024', text: 'Built core Unity gameplay systems and roguelike progression, modeled and rigged 7+ NPCs/assets in Blender, and ran 50+ playtests ahead of the VGDev Fall demo.', tags: ['Unity', 'Blender', 'Game Design'] },
+    { title: 'The Known World — Technical Director', year: '2023 – Present', text: 'Solo-developing a game from the ground up — coding, modeling, and animating movement systems, and optimizing rendering to cut CPU load by 20%.', tags: ['Game Dev', 'Solo Project'] },
   ] satisfies Experience[],
 }
 
@@ -71,19 +80,21 @@ export const projects = {
     {
       name: 'Videogame Development',
       projects: [
-        { title: 'Game Project One', pill: 'Unity', text: "One-line: what you built + what's cool about it.", tags: ['C#', 'Unity'], href: '#' },
+        { title: 'Chime', pill: 'Unity', text: 'Roguelike built with a small team — core gameplay systems, 7+ modeled & rigged NPCs, and 50+ playtests ahead of the VGDev Fall demo.', tags: ['C#', 'Unity', 'Blender'], href: '#' },
+        { title: 'The Known World', pill: 'Solo Project', text: 'A solo-developed game — coded, modeled, and animated the movement systems myself; optimized rendering cut CPU load 20% and grew playtime 50%+.', tags: ['C#', 'Unity', 'Blender'], href: '#' },
       ],
     },
     {
       name: 'Web Development',
       projects: [
-        { title: 'Web Project One', pill: 'Live', text: 'One-line: product outcome / users / impact.', tags: ['React', 'Node'], href: '#' },
+        { title: 'BuzzedIn', pill: 'Fullstack', text: 'A job-matching platform connecting job seekers and recruiters, with 5+ integrated APIs and dynamic filtering that lifted engagement 30%+.', tags: ['Fullstack', 'APIs'], href: '#' },
+        { title: 'Tutortle', pill: 'Fullstack', text: 'Location-based tutoring platform with real-time distance matching and in-app scheduling — cut matching time 40% and boosted coordination 25%.', tags: ['Fullstack', 'APIs', 'Real-time'], href: '#' },
       ],
     },
     {
       name: 'XR / VR Development',
       projects: [
-        { title: 'XR Project', pill: 'Quest', text: 'One-line: interaction/tech highlight.', tags: ['Unity', 'XR'], href: '#' },
+        { title: 'Autorobotics in Construction', pill: 'Research', text: 'Undergraduate VR/AI/robotics research improving safety and learning in construction — 6+ Unity environments, cross-platform VR support, 90+ FPS pipeline.', tags: ['Unity', 'VR', 'AI', 'Robotics'], href: '#' },
       ],
     },
     {
@@ -105,11 +116,11 @@ export const skills = {
   heading: 'Skills',
   subhead: 'Technologies I work with.',
   items: [
-    { k: 'Languages', v: 'Python • Java • C/C++ • JS/TS • C#' },
-    { k: 'Frameworks', v: 'React • Node • Flask • Next.js • Express' },
+    { k: 'Languages', v: 'Java • Python • C# • JavaScript • Lua • Assembly • SQL • HTML' },
+    { k: 'Frameworks', v: 'Django • MySQL • PythonAnywhere' },
     { k: 'Engines', v: 'Unity • Unreal Engine' },
-    { k: 'Tools', v: 'Git • Docker • Blender • Twilio • AWS' },
-    { k: 'Specialized', v: 'Machine Learning • XR/VR • Game Dev • Web3' },
+    { k: 'Tools', v: 'Blender • Twilio' },
+    { k: 'Specialized', v: 'VR Development • Human-Robot Interaction • Game Design • AI Applications • Web Development' },
   ] satisfies Skill[],
 }
 

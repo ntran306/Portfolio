@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { about } from '../content'
 
-const PHOTOS = [1, 2, 3]
+const SLOTS = [1, 2, 3]
 const BOUNCE = 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease'
 
 export default function About() {
@@ -60,17 +60,24 @@ export default function About() {
         </div>
 
         <div className="about-photos reveal" onMouseLeave={reset}>
-          {PHOTOS.map((n, i) => (
-            <div
-              key={n}
-              ref={(el) => { tiles.current[i] = el }}
-              className={`photo-diamond photo-diamond--${n}`}
-              onMouseEnter={() => applyWave(i)}
-              onMouseMove={(e) => tiltActive(e, i)}
-            >
-              <div className="photo-diamond__placeholder">Photo {n}</div>
-            </div>
-          ))}
+          {SLOTS.map((n, i) => {
+            const src = about.photos[i]
+            return (
+              <div
+                key={n}
+                ref={(el) => { tiles.current[i] = el }}
+                className={`photo-diamond photo-diamond--${n}`}
+                onMouseEnter={() => applyWave(i)}
+                onMouseMove={(e) => tiltActive(e, i)}
+              >
+                {src ? (
+                  <img className="photo-diamond__img" src={src} alt="" />
+                ) : (
+                  <div className="photo-diamond__placeholder">Photo {n}</div>
+                )}
+              </div>
+            )
+          })}
         </div>
 
         <div className="panel reveal">
