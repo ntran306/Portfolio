@@ -24,89 +24,134 @@ function makeArcs(R: number): string[] {
   ]
 }
 
-/* ---------- Detail view: a left semicircle dial; a right panel shows the
-   focused project. Scrolling (or clicking a diamond) rotates the whole
-   constellation so the active project glides along the arc to its apex. ---------- */
+/* ---------- Detail view: a left dial the projects orbit; a right panel shows
+   the focused project. Projects sit evenly spaced (360/N°) around the circle;
+   wheel and drag rotate the dial continuously — the diamonds ride the circle
+   1:1 with your input — then it softlocks to the nearest project. ---------- */
 const isVideo = (src: string) => /\.(mp4|webm|mov)$/i.test(src)
 
 function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClose: () => void }) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const dialRef = useRef<HTMLDivElement>(null)
+  const diamondRefs = useRef<(HTMLButtonElement | null)[]>([])
   const N = category.projects.length
+  const STEP = 360 / N // even spacing — project i rides at rot + i*STEP degrees
   const [active, setActive] = useState(0)
-  const activeRef = useRef(0)
-  const [dir, setDir] = useState(1) // last step direction — slides the detail panel to match
+  const [dir, setDir] = useState(1) // last travel direction — slides the detail panel to match
   const [geom, setGeom] = useState({ w: 0, h: 0, cx: 0, cy: 0, Rd: 0 })
+  const geomRef = useRef(geom)
+
+  // Continuous rotation: `rot` is what's painted, easing toward `target`.
+  // The project nearest the apex (0°, due right of the dial center) is active.
+  const rot = useRef(0)
+  const target = useRef(0)
+  const activeIdx = useRef(0)
 
   useEffect(() => {
     const el = wrapRef.current
     const dial = dialRef.current
     if (!el || !dial) return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     const measure = () => {
       const w = el.clientWidth
       const h = el.clientHeight
-      setGeom({
+      const g = {
         w, h,
         cx: Math.min(w * 0.13, 100),
         cy: h / 2,
         Rd: Math.max(110, Math.min(h * 0.4, 150)),
-      })
+      }
+      geomRef.current = g
+      setGeom(g)
     }
     measure()
     const ro = new ResizeObserver(measure)
     ro.observe(el)
 
-    const stepBy = (d: 1 | -1) => {
-      const next = Math.max(0, Math.min(N - 1, activeRef.current + d))
-      if (next === activeRef.current) return
-      activeRef.current = next
+    // Half-up rounding that treats negatives the same as positives —
+    // Math.round(-0.5) is -0 while Math.round(0.5) is 1, and that asymmetry
+    // would make the detent snap disagree with the active index right at the
+    // halfway point between two projects.
+    const roundHalf = (x: number) => Math.floor(x + 0.5)
+    const detent = (r: number) => roundHalf(r / STEP) * STEP
+    const idxOf = (r: number) => ((-roundHalf(r / STEP) % N) + N) % N
+    // Keep the detail panel in sync mid-rotation, not just at rest.
+    const syncActive = (r: number, d: 1 | -1) => {
+      const idx = idxOf(r)
+      if (idx === activeIdx.current) return
+      activeIdx.current = idx
       setDir(d)
-      setActive(next)
+      setActive(idx)
     }
 
-    // Wheel over the dial drives the dial only — the page never scrolls from
-    // here (the detail side scrolls normally). Deltas accumulate so a wheel
-    // notch or trackpad flick is one clean step, and a short cooldown keeps a
-    // single gesture from skipping through several projects mid-glide.
-    let acc = 0
-    let coolUntil = 0
+    // Paint loop: ease rot toward target and lay the diamonds out on the
+    // circle every frame — bright at the apex, receding toward the back.
+    let raf = 0
+    let lastRot = 0
+    const frame = () => {
+      const { cx, cy, Rd } = geomRef.current
+      const r = rot.current + (target.current - rot.current) * (reduce ? 1 : 0.16)
+      rot.current = Math.abs(target.current - r) < 0.01 ? target.current : r
+
+      diamondRefs.current.forEach((dEl, i) => {
+        if (!dEl) return
+        const a = ((rot.current + i * STEP) * Math.PI) / 180
+        dEl.style.left = `${cx + Rd * Math.cos(a)}px`
+        dEl.style.top = `${cy + Rd * Math.sin(a)}px`
+        const closeness = 0.5 + 0.5 * Math.cos(a) // 1 at apex → 0 at the back
+        dEl.style.opacity = (0.2 + 0.8 * closeness).toFixed(3)
+      })
+
+      if (rot.current !== lastRot) syncActive(rot.current, rot.current < lastRot ? 1 : -1)
+      lastRot = rot.current
+      raf = requestAnimationFrame(frame)
+    }
+    raf = requestAnimationFrame(frame)
+
+    // Wheel spins the dial continuously (never the page), softlocking to the
+    // nearest project once the gesture goes idle.
+    const K = STEP / 160 // deg per wheel-delta unit — one notch comfortably clears a project
+    let idle = 0
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
-      const now = performance.now()
-      if (now < coolUntil) return
-      if ((acc > 0) !== (e.deltaY > 0)) acc = 0 // direction flip resets the gesture
-      acc += e.deltaY
-      if (Math.abs(acc) < 60) return
-      const d: 1 | -1 = acc > 0 ? 1 : -1
-      acc = 0
-      coolUntil = now + 350
-      stepBy(d)
+      target.current -= e.deltaY * K
+      syncActive(target.current, e.deltaY > 0 ? 1 : -1)
+      window.clearTimeout(idle)
+      idle = window.setTimeout(() => { target.current = detent(target.current) }, 140)
     }
     dial.addEventListener('wheel', onWheel, { passive: false })
 
-    // Drag-to-spin, like the category wheel: pulling the dial up advances,
-    // pulling it down goes back, stepping once per ~70px of travel.
+    // Drag spins the dial in a circle, 1:1 under the pointer (no easing lag
+    // while grabbing), and settles to the nearest project on release.
     let dragging = false
-    let lastY = 0
-    let dragAcc = 0
+    let lastAngle = 0
+    const angleAt = (e: PointerEvent) => {
+      const b = el.getBoundingClientRect()
+      const { cx, cy } = geomRef.current
+      return (Math.atan2(e.clientY - (b.top + cy), e.clientX - (b.left + cx)) * 180) / Math.PI
+    }
     const onDown = (e: PointerEvent) => {
       dragging = true
-      lastY = e.clientY
-      dragAcc = 0
+      lastAngle = angleAt(e)
+      window.clearTimeout(idle)
       try { dial.setPointerCapture(e.pointerId) } catch { /* synthetic pointer */ }
     }
     const onMove = (e: PointerEvent) => {
       if (!dragging) return
-      dragAcc += e.clientY - lastY
-      lastY = e.clientY
-      if (Math.abs(dragAcc) >= 70) {
-        stepBy(dragAcc > 0 ? -1 : 1)
-        dragAcc = 0
-      }
+      const a = angleAt(e)
+      let d = a - lastAngle
+      if (d > 180) d -= 360
+      if (d < -180) d += 360
+      lastAngle = a
+      rot.current += d
+      target.current = rot.current
+      syncActive(rot.current, d < 0 ? 1 : -1)
     }
     const onUp = (e: PointerEvent) => {
+      if (!dragging) return
       dragging = false
+      target.current = detent(target.current)
       try { dial.releasePointerCapture(e.pointerId) } catch { /* already released */ }
     }
     dial.addEventListener('pointerdown', onDown)
@@ -115,6 +160,8 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
     dial.addEventListener('pointercancel', onUp)
 
     return () => {
+      cancelAnimationFrame(raf)
+      window.clearTimeout(idle)
       ro.disconnect()
       dial.removeEventListener('wheel', onWheel)
       dial.removeEventListener('pointerdown', onDown)
@@ -122,18 +169,23 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
       dial.removeEventListener('pointerup', onUp)
       dial.removeEventListener('pointercancel', onUp)
     }
-  }, [N])
+  }, [N, STEP])
 
   const project = category.projects[active] ?? category.projects[0]
   const { w, h, cx, cy, Rd } = geom
 
-  // The constellation rotates with `active`: the active project sits at the
-  // arc's apex (0°) and neighbors fan out by STEP°, clamped just inside the
-  // semicircle's ends so far-away markers bunch at the poles instead of
-  // leaving the arc. CSS transitions on left/top make each step glide.
-  const STEP = Math.min(55, 160 / Math.max(1, N - 1))
+  // Clicking a diamond spins it to the apex by the shortest path.
+  const spinTo = (i: number) => {
+    const base = -i * STEP
+    target.current = base + 360 * Math.round((target.current - base) / 360)
+    setDir(i > activeIdx.current ? 1 : -1)
+    activeIdx.current = i
+    setActive(i)
+  }
+
+  // Initial layout for the first paint; the rAF loop takes over immediately.
   const posOf = (i: number) => {
-    const a = (Math.max(-82, Math.min(82, (i - active) * STEP)) * Math.PI) / 180
+    const a = (i * STEP * Math.PI) / 180
     return { x: cx + Rd * Math.cos(a), y: cy + Rd * Math.sin(a) }
   }
 
@@ -156,15 +208,16 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
         <span className="proj-orbit__back">← back</span>
       </button>
 
-      {/* Diamond markers — one per project, gliding along the arc as `active` moves. */}
+      {/* Diamond markers — one per project, riding the dial as it spins. */}
       {Rd > 0 && category.projects.map((p, i) => {
         const pos = posOf(i)
         return (
           <button
             key={p.title}
+            ref={(el) => { diamondRefs.current[i] = el }}
             className={`proj-orbit__diamond${i === active ? ' is-active' : ''}`}
             style={{ left: pos.x, top: pos.y }}
-            onClick={() => { setDir(i > activeRef.current ? 1 : -1); activeRef.current = i; setActive(i) }}
+            onClick={() => spinTo(i)}
             aria-label={p.title}
             title={p.title}
           />

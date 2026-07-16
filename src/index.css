@@ -390,16 +390,15 @@ section.exp{ padding: 0; }
   fill: none; stroke: rgba(127,220,255,.28); stroke-width: 1.5; stroke-linecap: round;
   filter: drop-shadow(0 0 6px rgba(127,220,255,.3));
 }
-/* Diamond markers gliding along the orbit arc — left/top are animated so each
-   step swings the constellation around the dial with a springy settle. */
+/* Diamond markers riding the dial — position and depth-fade are written every
+   frame by the orbit's rAF loop (continuous spin + softlock), so left/top and
+   opacity must NOT be transitioned here. */
 .proj-orbit__diamond{
   position: absolute; width: 18px; height: 18px; z-index: 6; padding: 0;
   background: rgba(255,255,255,.05); border: 1.5px solid rgba(106,166,255,.5);
-  border-radius: 3px; cursor: pointer;
+  border-radius: 3px; cursor: pointer; will-change: left, top, opacity;
   transform: translate(-50%,-50%) rotate(45deg);
-  transition: background .25s ease, box-shadow .3s ease, border-color .25s ease,
-    transform .3s cubic-bezier(0.34,1.56,0.64,1),
-    left .55s cubic-bezier(0.34,1.56,0.64,1), top .55s cubic-bezier(0.34,1.56,0.64,1);
+  transition: background .25s ease, box-shadow .3s ease, border-color .25s ease, transform .3s cubic-bezier(0.34,1.56,0.64,1);
 }
 .proj-orbit__diamond:hover{
   background: rgba(106,166,255,.22); border-color: var(--blue2);
@@ -549,11 +548,16 @@ section.exp{ padding: 0; }
 /* Skills list — revealed to the right when the section is selected */
 .sk-chips{ display: flex; flex-wrap: wrap; gap: 8px; }
 .sk-chip{
+  display: inline-flex; align-items: center; gap: 7px;
   padding: 6px 13px; border-radius: 999px; font-size: 12.5px; font-weight: 550; white-space: nowrap;
   border: 1px solid rgba(106,166,255,.22); background: rgba(106,166,255,.07); color: var(--blue2);
   opacity: 0; transform: translateX(-8px);
   transition: opacity .4s ease, transform .4s cubic-bezier(0.34,1.56,0.64,1);
 }
+.sk-chip__icon{ width: 14px; height: 14px; display: block; flex-shrink: 0; }
+/* dark/monochrome logos flip to white so they read on the dark theme */
+.sk-chip__icon--invert{ filter: invert(1) brightness(1.6); }
+.sk-chip__emoji{ font-size: 12px; line-height: 1; }
 /* Revealed only while the section is selected AND the tree is in view, so the
    selection fades out when you scroll away and fades back when you return. */
 .sk-tree.is-in .sk-branch.is-sel .sk-chip{ opacity: 1; transform: translateX(0); transition-delay: calc(var(--j, 0) * 45ms); }
