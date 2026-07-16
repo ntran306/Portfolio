@@ -28,8 +28,8 @@ export const about = {
   bio: "I'm a Computer Science student at Georgia Tech minoring in FinTech, focused on building interactive systems that span game development, fullstack web, and VR/robotics research. Right now I'm splitting time between a VR + AI research project, two fullstack products, and a solo game I've been building since 2023. Outside of class, I'm part of VGDev (GT's Video Game Development Club) and GT Swim Club, and I spend my free time on calisthenics, bouldering, piano, and probably too much UFC. Always looking for the next thing to build.",
   // Impact stats — the number counts up when scrolled into view.
   stats: [
-    { value: 4, suffix: '', label: 'Years of coding experience' },
-    { value: 2, suffix: '', label: 'Years of AI applications' },
+    { value: 4, suffix: '+', label: 'Years of coding experience' },
+    { value: 2, suffix: '+', label: 'Years of AI applications' },
     { value: 450, suffix: '+', label: 'Game demo visits attracted' },
   ],
   // ➕ Add up to 3 photos (paths under public/, e.g. 'assets/name.jpg'). Fewer

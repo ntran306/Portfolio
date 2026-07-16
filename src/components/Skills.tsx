@@ -31,6 +31,15 @@ const SKILL_ICONS: Record<string, string> = {
 /* White/dark logos need inverting to stay visible on the dark theme. */
 const INVERT_ICONS = new Set(['Unreal Engine', 'Django', 'Unity'])
 
+/* Icons for the section branches themselves (Languages, Frameworks, …). */
+const SECTION_ICONS: Record<string, string> = {
+  'Languages': '⌨️',
+  'Frameworks': '🧩',
+  'Engines': '⚙️',
+  'Tools': '🛠️',
+  'Specialized': '🚀',
+}
+
 function ChipIcon({ label }: { label: string }) {
   const icon = SKILL_ICONS[label]
   if (!icon) return null
@@ -151,6 +160,9 @@ export default function Skills() {
               >
                 <span className="sk-branch__head">
                   <span className="sk-branch__marker" />
+                  {SECTION_ICONS[s.k] && (
+                    <span className="sk-branch__icon" aria-hidden="true">{SECTION_ICONS[s.k]}</span>
+                  )}
                   <span className="sk-branch__name">{s.k}</span>
                 </span>
                 <span className="sk-chips">
