@@ -373,6 +373,17 @@ section.exp{ padding: 0; }
 }
 .proj-orbit__back{ font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
 
+/* Invisible grab/scroll surface over the dial's half. Its width matches the
+   detail panel's left edge, so wheel/drag over the dial drives only the dial
+   (touch-action none blocks page pan) while the detail side scrolls the page
+   normally. Diamonds (z6) and the center button (z7) sit above it. */
+.proj-orbit__dial{
+  position: absolute; top: 0; bottom: 0; left: 0;
+  width: clamp(270px, 38%, 400px);
+  z-index: 5; cursor: grab; touch-action: none;
+}
+.proj-orbit__dial:active{ cursor: grabbing; }
+
 /* The left dial — its arc + orbiting pill labels. */
 .proj-orbit__arc{ position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .proj-orbit__arcline{
@@ -451,6 +462,7 @@ section.exp{ padding: 0; }
   .proj-orbit__arc{ display: none; }
   .proj-orbit__diamond{ display: none; }
   .proj-orbit__scroll-hint{ display: none; }
+  .proj-orbit__dial{ display: none; }
   .proj-orbit__center{
     left: 0; top: 0; transform: none; flex-direction: row; align-items: center;
     gap: 10px; padding: 4px 0;

@@ -31,6 +31,7 @@ const isVideo = (src: string) => /\.(mp4|webm|mov)$/i.test(src)
 
 function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClose: () => void }) {
   const wrapRef = useRef<HTMLDivElement>(null)
+  const dialRef = useRef<HTMLDivElement>(null)
   const N = category.projects.length
   const [active, setActive] = useState(0)
   const activeRef = useRef(0)
@@ -39,7 +40,8 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
 
   useEffect(() => {
     const el = wrapRef.current
-    if (!el) return
+    const dial = dialRef.current
+    if (!el || !dial) return
 
     const measure = () => {
       const w = el.clientWidth
@@ -55,34 +57,71 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
     const ro = new ResizeObserver(measure)
     ro.observe(el)
 
-    // Scroll on the arc side steps through projects; the right panel side — and
-    // scrolling past either end — falls through to normal page scroll, so the
-    // orbit never traps the page. Deltas accumulate so a wheel notch or trackpad
-    // flick is one clean step, and a short cooldown keeps a single gesture from
-    // skipping through several projects mid-glide.
+    const stepBy = (d: 1 | -1) => {
+      const next = Math.max(0, Math.min(N - 1, activeRef.current + d))
+      if (next === activeRef.current) return
+      activeRef.current = next
+      setDir(d)
+      setActive(next)
+    }
+
+    // Wheel over the dial drives the dial only — the page never scrolls from
+    // here (the detail side scrolls normally). Deltas accumulate so a wheel
+    // notch or trackpad flick is one clean step, and a short cooldown keeps a
+    // single gesture from skipping through several projects mid-glide.
     let acc = 0
     let coolUntil = 0
     const onWheel = (e: WheelEvent) => {
-      const detail = el.querySelector('.proj-orbit__detail') as HTMLElement | null
-      if (detail && e.clientX >= detail.getBoundingClientRect().left) return
-      const d = e.deltaY > 0 ? 1 : -1
-      const next = activeRef.current + d
-      if (next < 0 || next >= N) return // at the ends: let the page scroll
       e.preventDefault()
       const now = performance.now()
       if (now < coolUntil) return
       if ((acc > 0) !== (e.deltaY > 0)) acc = 0 // direction flip resets the gesture
       acc += e.deltaY
       if (Math.abs(acc) < 60) return
+      const d: 1 | -1 = acc > 0 ? 1 : -1
       acc = 0
       coolUntil = now + 350
-      activeRef.current = next
-      setDir(d)
-      setActive(next)
+      stepBy(d)
     }
-    el.addEventListener('wheel', onWheel, { passive: false })
+    dial.addEventListener('wheel', onWheel, { passive: false })
 
-    return () => { ro.disconnect(); el.removeEventListener('wheel', onWheel) }
+    // Drag-to-spin, like the category wheel: pulling the dial up advances,
+    // pulling it down goes back, stepping once per ~70px of travel.
+    let dragging = false
+    let lastY = 0
+    let dragAcc = 0
+    const onDown = (e: PointerEvent) => {
+      dragging = true
+      lastY = e.clientY
+      dragAcc = 0
+      try { dial.setPointerCapture(e.pointerId) } catch { /* synthetic pointer */ }
+    }
+    const onMove = (e: PointerEvent) => {
+      if (!dragging) return
+      dragAcc += e.clientY - lastY
+      lastY = e.clientY
+      if (Math.abs(dragAcc) >= 70) {
+        stepBy(dragAcc > 0 ? -1 : 1)
+        dragAcc = 0
+      }
+    }
+    const onUp = (e: PointerEvent) => {
+      dragging = false
+      try { dial.releasePointerCapture(e.pointerId) } catch { /* already released */ }
+    }
+    dial.addEventListener('pointerdown', onDown)
+    dial.addEventListener('pointermove', onMove)
+    dial.addEventListener('pointerup', onUp)
+    dial.addEventListener('pointercancel', onUp)
+
+    return () => {
+      ro.disconnect()
+      dial.removeEventListener('wheel', onWheel)
+      dial.removeEventListener('pointerdown', onDown)
+      dial.removeEventListener('pointermove', onMove)
+      dial.removeEventListener('pointerup', onUp)
+      dial.removeEventListener('pointercancel', onUp)
+    }
   }, [N])
 
   const project = category.projects[active] ?? category.projects[0]
@@ -100,6 +139,11 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
 
   return (
     <div className="proj-orbit" ref={wrapRef} role="dialog" aria-label={category.name}>
+      {/* Grab/scroll surface for the dial half — wheel and drag land here (and
+          only here), so dial input never leaks into page scroll. Sits under
+          the diamonds and center button, which stay clickable. */}
+      <div className="proj-orbit__dial" ref={dialRef} aria-hidden="true" />
+
       {Rd > 0 && (
         <svg className="proj-orbit__arc" viewBox={`0 0 ${w} ${h}`} aria-hidden="true">
           <path className="proj-orbit__arcline" d={`M${cx},${cy - Rd} A${Rd},${Rd} 0 0 1 ${cx},${cy + Rd}`} />
@@ -127,7 +171,7 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
         )
       })}
 
-      {N > 1 && <div className="proj-orbit__scroll-hint" aria-hidden="true">scroll ↑↓</div>}
+      {N > 1 && <div className="proj-orbit__scroll-hint" aria-hidden="true">scroll · drag</div>}
 
       {/* Detail + media; re-keyed to replay the entrance, sliding from the
           direction of travel. */}
