@@ -46,6 +46,10 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
   const rot = useRef(0)
   const target = useRef(0)
   const activeIdx = useRef(0)
+  const dragDist = useRef(0) // px moved since pointerdown — tells a drag from a click
+  // Drag entry point shared with the diamonds' onPointerDown (they mount after
+  // the effect runs, so they can't be wired up with addEventListener there).
+  const dragStartRef = useRef<((e: PointerEvent, capEl: Element) => void) | null>(null)
 
   useEffect(() => {
     const el = wrapRef.current
@@ -123,22 +127,34 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
     dial.addEventListener('wheel', onWheel, { passive: false })
 
     // Drag spins the dial in a circle, 1:1 under the pointer (no easing lag
-    // while grabbing), and settles to the nearest project on release.
+    // while grabbing), and settles to the nearest project on release. Drags
+    // can start on the dial surface OR on a diamond — same feel either way;
+    // a small movement threshold keeps plain diamond clicks working.
     let dragging = false
     let lastAngle = 0
+    let startX = 0
+    let startY = 0
     const angleAt = (e: PointerEvent) => {
       const b = el.getBoundingClientRect()
       const { cx, cy } = geomRef.current
       return (Math.atan2(e.clientY - (b.top + cy), e.clientX - (b.left + cx)) * 180) / Math.PI
     }
-    const onDown = (e: PointerEvent) => {
+    const startDrag = (e: PointerEvent, capEl: Element) => {
       dragging = true
       lastAngle = angleAt(e)
+      startX = e.clientX
+      startY = e.clientY
+      dragDist.current = 0
       window.clearTimeout(idle)
-      try { dial.setPointerCapture(e.pointerId) } catch { /* synthetic pointer */ }
+      // capture on whatever was grabbed (dial or diamond), so the diamond's
+      // click still fires at the diamond when it wasn't really a drag
+      try { capEl.setPointerCapture(e.pointerId) } catch { /* synthetic pointer */ }
     }
+    dragStartRef.current = startDrag
+    const onDialDown = (e: PointerEvent) => startDrag(e, dial)
     const onMove = (e: PointerEvent) => {
       if (!dragging) return
+      dragDist.current = Math.max(dragDist.current, Math.hypot(e.clientX - startX, e.clientY - startY))
       const a = angleAt(e)
       let d = a - lastAngle
       if (d > 180) d -= 360
@@ -148,34 +164,39 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
       target.current = rot.current
       syncActive(rot.current, d < 0 ? 1 : -1)
     }
-    const onUp = (e: PointerEvent) => {
+    const onUp = () => {
       if (!dragging) return
       dragging = false
       target.current = detent(target.current)
-      try { dial.releasePointerCapture(e.pointerId) } catch { /* already released */ }
+      // let the trailing click (which fires right after pointerup) read the
+      // drag distance before it resets
+      window.setTimeout(() => { dragDist.current = 0 }, 0)
     }
-    dial.addEventListener('pointerdown', onDown)
-    dial.addEventListener('pointermove', onMove)
-    dial.addEventListener('pointerup', onUp)
-    dial.addEventListener('pointercancel', onUp)
+    dial.addEventListener('pointerdown', onDialDown)
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('pointercancel', onUp)
 
     return () => {
       cancelAnimationFrame(raf)
       window.clearTimeout(idle)
       ro.disconnect()
+      dragStartRef.current = null
       dial.removeEventListener('wheel', onWheel)
-      dial.removeEventListener('pointerdown', onDown)
-      dial.removeEventListener('pointermove', onMove)
-      dial.removeEventListener('pointerup', onUp)
-      dial.removeEventListener('pointercancel', onUp)
+      dial.removeEventListener('pointerdown', onDialDown)
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
     }
   }, [N, STEP])
 
   const project = category.projects[active] ?? category.projects[0]
   const { w, h, cx, cy, Rd } = geom
 
-  // Clicking a diamond spins it to the apex by the shortest path.
+  // Clicking a diamond spins it to the apex by the shortest path. A grab that
+  // actually dragged the dial suppresses the trailing click.
   const spinTo = (i: number) => {
+    if (dragDist.current > 6) return
     const base = -i * STEP
     target.current = base + 360 * Math.round((target.current - base) / 360)
     setDir(i > activeIdx.current ? 1 : -1)
@@ -217,6 +238,7 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
             ref={(el) => { diamondRefs.current[i] = el }}
             className={`proj-orbit__diamond${i === active ? ' is-active' : ''}`}
             style={{ left: pos.x, top: pos.y }}
+            onPointerDown={(e) => dragStartRef.current?.(e.nativeEvent, e.currentTarget)}
             onClick={() => spinTo(i)}
             aria-label={p.title}
             title={p.title}

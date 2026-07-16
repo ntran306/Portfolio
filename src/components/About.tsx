@@ -80,8 +80,16 @@ export default function About() {
           })}
         </div>
 
-        <div className="panel reveal">
-          <p>{about.bio}</p>
+        <div className="about-info reveal">
+          <div className="about-facts">
+            {about.facts.map((f, i) => (
+              <span key={f} className="about-facts__item">
+                {i > 0 && <span className="about-facts__dot" aria-hidden="true" />}
+                {f}
+              </span>
+            ))}
+          </div>
+          <p className="about-bio">{about.bio}</p>
         </div>
       </div>
     </section>

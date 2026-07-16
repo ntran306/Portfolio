@@ -24,6 +24,8 @@ export const links = {
 export const about = {
   heading: 'About',
   subhead: 'A little bit about me.',
+  // Short facts line shown between the photos and the bio.
+  facts: ['Georgia Tech ’27', 'CS + FinTech', 'Atlanta, GA'],
   bio: "I'm a Computer Science student at Georgia Tech (Class of 2027, GPA 3.82) minoring in FinTech, focused on building interactive systems that span game development, fullstack web, and VR/robotics research. Right now I'm splitting time between a VR + AI research project, two fullstack products, and a solo game I've been building since 2023. Outside of class, I'm part of VGDev (GT's Video Game Development Club) and GT Swim Club, and I spend my free time on calisthenics, bouldering, piano, and probably too much UFC. Always looking for the next thing to build.",
   // ➕ Add up to 3 photos (paths under public/, e.g. 'assets/name.jpg'). Fewer
   // than 3 leaves the remaining diamond(s) as a placeholder.
