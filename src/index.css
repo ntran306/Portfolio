@@ -57,9 +57,10 @@ a{ color:inherit; text-decoration:none; }
   border: 1px solid transparent;
   transition: background .2s ease, border-color .2s ease, color .2s ease;
 }
-.nav__link:hover{ color: var(--text); border-color: rgba(255,255,255,.12); background: rgba(255,255,255,.04); }
+.nav__link:hover{ color: var(--text); }
 .nav__link.active{ color: var(--text); }
 .nav__cta{ border-color: rgba(106,166,255,.22); background: rgba(106,166,255,.08); color: var(--text); }
+.nav__cta:hover{ background: rgba(106,166,255,.14); border-color: rgba(106,166,255,.35); }
 
 /* Mobile menu toggle — hidden on desktop */
 .nav__burger{
@@ -151,7 +152,7 @@ a{ color:inherit; text-decoration:none; }
 }
 /* Impact stat cards — big gradient number over a small-caps label. */
 .about-stats{
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px;
   width: 100%; max-width: 840px; margin-top: 12px;
 }
 .stat-card{
@@ -172,9 +173,6 @@ a{ color:inherit; text-decoration:none; }
 .stat-card__label{
   display: block; margin-top: 9px; font-size: 11px; letter-spacing: .13em;
   text-transform: uppercase; color: var(--muted);
-}
-@media (max-width: 720px){
-  .about-stats{ grid-template-columns: repeat(2, 1fr); }
 }
 @media (prefers-reduced-motion: reduce){
   .stat-card{ transition: none; }
@@ -274,6 +272,7 @@ a{ color:inherit; text-decoration:none; }
   border-color: rgba(106,166,255,.35); color: var(--text);
 }
 .btn--primary:hover{ background: linear-gradient(135deg, rgba(106,166,255,.35), rgba(127,220,255,.22)); border-color: rgba(106,166,255,.5); }
+.btn__icon{ width: 16px; height: 16px; flex-shrink: 0; display: block; }
 .hero__buttons{ display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 
 /* Accent */
@@ -463,10 +462,12 @@ section.exp{ padding: 0; }
 }
 .proj-orbit__scroll-hint{
   position: absolute; left: min(13%, 100px); bottom: 22%; transform: translateX(-50%);
+  display: inline-flex; align-items: center; gap: 6px;
   font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
   color: var(--muted); opacity: .45; pointer-events: none; z-index: 7;
   animation: expHint 2.2s ease-in-out infinite;
 }
+.hint-icon{ width: 15px; height: 15px; display: inline-block; vertical-align: middle; }
 
 /* Right panel: explanation on the left, media on the right. */
 .proj-orbit__detail{
@@ -725,14 +726,6 @@ section.exp{ padding: 0; }
   object-fit: cover; display: block;
   transform: rotate(-45deg) scale(1.45);
 }
-/* Per-photo framing nudges to keep faces in view. The tile's axes are rotated
-   +45°, so a screen-right shift is translate(+x, −x) in local space (and
-   screen-left is the mirror). Scale stays near the √2 coverage floor to keep
-   the photos as zoomed-out as the diamond crop allows; vertical framing is
-   recovered with object-position, which costs no zoom. */
-.photo-diamond--2 .photo-diamond__img{ transform: translate(-5%, 5%) rotate(-45deg) scale(1.56); object-position: 50% 30%; }
-.photo-diamond--3 .photo-diamond__img{ transform: translate(5%, -5%) rotate(-45deg) scale(1.56); }
-
 /* Loader */
 .loader{
   position: fixed; inset: 0; z-index: 9999;
@@ -757,11 +750,15 @@ textarea:focus-visible, summary:focus-visible, .nav__link:focus-visible{
 
 /* Active nav indicator */
 .nav__link{ position: relative; }
-.nav__link.active:not(.nav__cta)::after{
+.nav__link:not(.nav__cta)::after{
   content: ""; position: absolute; left: 12px; right: 12px; bottom: 3px; height: 2px;
   border-radius: 2px; background: linear-gradient(90deg, var(--blue), var(--blue2));
   box-shadow: 0 0 10px rgba(106,166,255,.6);
+  transform: scaleX(0); transform-origin: center;
+  transition: transform .32s cubic-bezier(0.4, 0, 0.2, 1);
 }
+.nav__link:not(.nav__cta):hover::after,
+.nav__link.active:not(.nav__cta)::after{ transform: scaleX(1); }
 
 /* Custom scrollbar */
 html{ scrollbar-width: thin; scrollbar-color: rgba(106,166,255,.4) transparent; }
@@ -783,6 +780,7 @@ html{ scrollbar-width: thin; scrollbar-color: rgba(106,166,255,.4) transparent; 
   .section__head h2::before, .section__head h2::after{ transition: none; }
   .section__head h2::before{ transform: scaleX(1); }
   .section__head h2::after{ transform: scaleX(1); }
+  .nav__link::after{ transition: none; }
 }
 
 @media (max-width: 720px){

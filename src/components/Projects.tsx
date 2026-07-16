@@ -246,7 +246,13 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
         )
       })}
 
-      {N > 1 && <div className="proj-orbit__scroll-hint" aria-hidden="true">scroll · drag</div>}
+      {N > 1 && (
+        <div className="proj-orbit__scroll-hint" aria-hidden="true">
+          <svg className="hint-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><rect x="8" y="2.5" width="8" height="13" rx="4"/><line x1="12" y1="6" x2="12" y2="9"/><path d="M9 19.5l3 3 3-3"/></svg>
+          {' · '}
+          <svg className="hint-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="9 19 12 22 15 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+        </div>
+      )}
 
       {/* Detail + media; re-keyed to replay the entrance, sliding from the
           direction of travel. */}
@@ -256,7 +262,8 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
           <p className="proj-orbit__text">{project.text}</p>
           <div className="tags">{project.tags.map((t) => <span key={t} className="tag">{t}</span>)}</div>
           <a className="btn btn--primary proj-orbit__cta" href={project.href} target="_blank" rel="noreferrer">
-            View project →
+            <svg className="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            View project
           </a>
         </div>
         <div className="proj-orbit__media">

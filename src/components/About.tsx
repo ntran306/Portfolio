@@ -117,7 +117,6 @@ export default function About() {
       <div className="content-wrap">
         <div className="section__head reveal">
           <h2>{about.heading}</h2>
-          <p>{about.subhead}</p>
         </div>
 
         <div className="about-photos reveal" onMouseLeave={reset}>
