@@ -17,7 +17,7 @@ export const links = {
   email: 'nathangsu306@gmail.com',
   github: 'https://github.com/ntran306',
   linkedin: 'https://www.linkedin.com/in/ntran306/',
-  resume: 'assets/resume.pdf',
+  resume: '/assets/resume.pdf',
 }
 
 /* ---------- About ---------- */
@@ -32,12 +32,12 @@ export const about = {
     { value: 2, suffix: '+', label: 'Years of AI applications' },
     { value: 450, suffix: '+', label: 'Game demo visits attracted' },
   ],
-  // ➕ Add up to 3 photos (paths under public/, e.g. 'assets/name.jpg'). Fewer
+  // ➕ Add up to 3 photos (paths under public/, e.g. '/assets/name.jpg'). Fewer
   // than 3 leaves the remaining diamond(s) as a placeholder.
   photos: [
-    'assets/photo1_sq.jpg',
-    'assets/photo2_sq.jpg',
-    'assets/photo3_sq.jpg',
+    '/assets/photo1_sq.jpg',
+    '/assets/photo2_sq.jpg',
+    '/assets/photo3_sq.jpg',
   ],
 }
 
