@@ -1,8 +1,69 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { about } from '../content'
 
-const PHOTOS = [1, 2, 3]
+const SLOTS = [1, 2, 3]
 const BOUNCE = 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease'
+
+/* Impact stat cards — the numbers count up (ease-out) each time the grid
+   scrolls into view. Rendered at their final value so no-JS/reduced-motion
+   readers always see the real numbers. */
+function AboutStats() {
+  const gridRef = useRef<HTMLDivElement>(null)
+  const numRefs = useRef<(HTMLSpanElement | null)[]>([])
+
+  useEffect(() => {
+    const grid = gridRef.current
+    if (!grid) return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    let raf = 0
+    let settle = 0
+
+    const setFinals = () => numRefs.current.forEach((el, i) => {
+      const s = about.stats[i]
+      if (el && s) el.textContent = `${s.value}${s.suffix}`
+    })
+
+    const run = () => {
+      if (reduce) { setFinals(); return }
+      cancelAnimationFrame(raf)
+      window.clearTimeout(settle)
+      const D = 1100
+      const t0 = performance.now()
+      const tick = (now: number) => {
+        const p = Math.min(1, (now - t0) / D)
+        const e = 1 - Math.pow(1 - p, 3)
+        numRefs.current.forEach((el, i) => {
+          const s = about.stats[i]
+          if (el && s) el.textContent = `${Math.round(s.value * e)}${s.suffix}`
+        })
+        if (p < 1) raf = requestAnimationFrame(tick)
+      }
+      raf = requestAnimationFrame(tick)
+      // insurance for throttled tabs where rAF may stall mid-count
+      settle = window.setTimeout(setFinals, D + 400)
+    }
+
+    const io = new IntersectionObserver(
+      (es) => { if (es.some((x) => x.isIntersecting)) run() },
+      { threshold: 0.4 },
+    )
+    io.observe(grid)
+    return () => { io.disconnect(); cancelAnimationFrame(raf); window.clearTimeout(settle) }
+  }, [])
+
+  return (
+    <div className="about-stats" ref={gridRef}>
+      {about.stats.map((s, i) => (
+        <div className="stat-card" key={s.label}>
+          <span className="stat-card__n" ref={(el) => { numRefs.current[i] = el }}>
+            {s.value}{s.suffix}
+          </span>
+          <span className="stat-card__label">{s.label}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export default function About() {
   const tiles = useRef<(HTMLDivElement | null)[]>([])
@@ -56,25 +117,40 @@ export default function About() {
       <div className="content-wrap">
         <div className="section__head reveal">
           <h2>{about.heading}</h2>
-          <p>{about.subhead}</p>
         </div>
 
         <div className="about-photos reveal" onMouseLeave={reset}>
-          {PHOTOS.map((n, i) => (
-            <div
-              key={n}
-              ref={(el) => { tiles.current[i] = el }}
-              className={`photo-diamond photo-diamond--${n}`}
-              onMouseEnter={() => applyWave(i)}
-              onMouseMove={(e) => tiltActive(e, i)}
-            >
-              <div className="photo-diamond__placeholder">Photo {n}</div>
-            </div>
-          ))}
+          {SLOTS.map((n, i) => {
+            const src = about.photos[i]
+            return (
+              <div
+                key={n}
+                ref={(el) => { tiles.current[i] = el }}
+                className={`photo-diamond photo-diamond--${n}`}
+                onMouseEnter={() => applyWave(i)}
+                onMouseMove={(e) => tiltActive(e, i)}
+              >
+                {src ? (
+                  <img className="photo-diamond__img" src={src} alt="" />
+                ) : (
+                  <div className="photo-diamond__placeholder">Photo {n}</div>
+                )}
+              </div>
+            )
+          })}
         </div>
 
-        <div className="panel reveal">
-          <p>{about.bio}</p>
+        <div className="about-info reveal">
+          <div className="about-facts">
+            {about.facts.map((f, i) => (
+              <span key={f} className="about-facts__item">
+                {i > 0 && <span className="about-facts__dot" aria-hidden="true" />}
+                {f}
+              </span>
+            ))}
+          </div>
+          <p className="about-bio">{about.bio}</p>
+          <AboutStats />
         </div>
       </div>
     </section>

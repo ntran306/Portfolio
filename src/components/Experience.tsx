@@ -21,13 +21,17 @@ const LAYERS: WaveLayer[] = [
 ]
 const MAIN = LAYERS[LAYERS.length - 1]
 
+const COMPACT_QUERY = '(max-width: 820px), (prefers-reduced-motion: reduce)'
+
 export default function Experience() {
-  const [compact, setCompact] = useState(false)
+  // Lazy init so the first render already picks the right variant — starting
+  // at `false` and flipping in an effect would swap in DOM that mount-time
+  // observers (useReveal) never saw.
+  const [compact, setCompact] = useState(() => window.matchMedia(COMPACT_QUERY).matches)
 
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 820px), (prefers-reduced-motion: reduce)')
+    const mq = window.matchMedia(COMPACT_QUERY)
     const update = () => setCompact(mq.matches)
-    update()
     mq.addEventListener('change', update)
     return () => mq.removeEventListener('change', update)
   }, [])
@@ -38,7 +42,7 @@ export default function Experience() {
 /* ---------- Compact / reduced-motion fallback ---------- */
 function ExperienceList() {
   return (
-    <section id="experience" className="section">
+    <section id="experience" className="section exp-compact">
       <div className="content-wrap">
         <div className="section__head reveal">
           <h2>{experience.heading}</h2>
@@ -270,17 +274,10 @@ function ExperiencePinned() {
   const N = experience.items.length
   return (
     <section id="experience" className="section exp">
-      <div className="content-wrap">
-        <div className="section__head reveal">
-          <h2>{experience.heading}</h2>
-          <p>{experience.scrollHint}</p>
-        </div>
-      </div>
-
       <div className="exp-track" ref={trackRef} style={{ height: `${N * 100 + 100}vh` }}>
         <div className="exp-stage" ref={stageRef}>
-          <span className="exp-eyebrow">{experience.heading}</span>
           <canvas className="exp-wave" ref={canvasRef} aria-hidden="true"></canvas>
+          <div className="exp-eyebrow" aria-hidden="true">{experience.heading}</div>
 
           <div className="exp-cards">
             {experience.items.map((e, i) => (

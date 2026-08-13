@@ -7,6 +7,7 @@ import Experience from './components/Experience'
 import Projects from './components/Projects'
 import Skills from './components/Skills'
 import Contact from './components/Contact'
+import OceanParticles from './components/OceanParticles'
 import useReveal from './hooks/useReveal'
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
   return (
     <>
       <Loader />
+      <OceanParticles />
       <Nav />
       <main className="wrap">
         <Home />

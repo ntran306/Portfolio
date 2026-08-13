@@ -24,135 +24,261 @@ function makeArcs(R: number): string[] {
   ]
 }
 
-/* ---------- Detail view: projects orbiting a left-anchored circle ---------- */
+/* ---------- Detail view: a left dial the projects orbit; a right panel shows
+   the focused project. Projects sit evenly spaced (360/N°) around the circle;
+   wheel and drag rotate the dial continuously — the diamonds ride the circle
+   1:1 with your input — then it softlocks to the nearest project. ---------- */
+const isVideo = (src: string) => /\.(mp4|webm|mov)$/i.test(src)
+
 function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClose: () => void }) {
   const wrapRef = useRef<HTMLDivElement>(null)
-  const svgRef = useRef<SVGSVGElement>(null)
-  const arcRef = useRef<SVGPathElement>(null)
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([])
-  const rotation = useRef(0)
-  const drag = useRef({ active: false, lastA: 0, vel: 0 })
-  const rafRef = useRef(0)
-  const geom = useRef({ cx: 0, cy: 0, Rd: 0 })
+  const dialRef = useRef<HTMLDivElement>(null)
+  const diamondRefs = useRef<(HTMLButtonElement | null)[]>([])
   const N = category.projects.length
+  const STEP = 360 / N // even spacing — project i rides at rot + i*STEP degrees
+  const [active, setActive] = useState(0)
+  const [dir, setDir] = useState(1) // last travel direction — slides the detail panel to match
+  const [geom, setGeom] = useState({ w: 0, h: 0, cx: 0, cy: 0, Rd: 0 })
+  const geomRef = useRef(geom)
 
-  const angleAt = (clientX: number, clientY: number) => {
-    const r = wrapRef.current!.getBoundingClientRect()
-    return Math.atan2(clientY - (r.top + geom.current.cy), clientX - (r.left + geom.current.cx))
-  }
-
-  // Place each card on the circle; the one nearest the right (front) is largest.
-  const layout = () => {
-    const { cx, cy, Rd } = geom.current
-    for (let i = 0; i < N; i++) {
-      const el = cardRefs.current[i]
-      if (!el) continue
-      const a = rotation.current + (i / N) * Math.PI * 2
-      const x = cx + Math.cos(a) * Rd
-      const y = cy + Math.sin(a) * Rd
-      const front = (Math.cos(a) + 1) / 2 // 1 at the right, 0 at the left (behind)
-      const s = 0.55 + front * 0.45
-      el.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-50%) scale(${s.toFixed(3)})`
-      el.style.opacity = (0.06 + front * 0.94).toFixed(2)
-      el.style.zIndex = String(Math.round(front * 100))
-      el.style.pointerEvents = front > 0.72 ? 'auto' : 'none'
-    }
-  }
+  // Continuous rotation: `rot` is what's painted, easing toward `target`.
+  // The project nearest the apex (0°, due right of the dial center) is active.
+  const rot = useRef(0)
+  const target = useRef(0)
+  const activeIdx = useRef(0)
+  const dragDist = useRef(0) // px moved since pointerdown — tells a drag from a click
+  // Drag entry point shared with the diamonds' onPointerDown (they mount after
+  // the effect runs, so they can't be wired up with addEventListener there).
+  const dragStartRef = useRef<((e: PointerEvent, capEl: Element) => void) | null>(null)
 
   useEffect(() => {
     const el = wrapRef.current
-    if (!el) return
+    const dial = dialRef.current
+    if (!el || !dial) return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
     const measure = () => {
       const w = el.clientWidth
       const h = el.clientHeight
-      const cx = Math.min(w * 0.18, 200)
-      const cy = h / 2
-      const Rd = Math.max(140, Math.min(h * 0.48, w - cx - 100))
-      geom.current = { cx, cy, Rd }
-      if (svgRef.current) svgRef.current.setAttribute('viewBox', `0 0 ${w} ${h}`)
-      if (arcRef.current) arcRef.current.setAttribute('d', `M${cx},${cy - Rd} A${Rd},${Rd} 0 0 1 ${cx},${cy + Rd}`)
-      layout()
+      const g = {
+        w, h,
+        cx: Math.min(w * 0.13, 100),
+        cy: h / 2,
+        Rd: Math.max(110, Math.min(h * 0.4, 150)),
+      }
+      geomRef.current = g
+      setGeom(g)
     }
     measure()
     const ro = new ResizeObserver(measure)
     ro.observe(el)
 
-    // Scroll over the orbit rotates it (non-passive so we can preventDefault).
+    // Half-up rounding that treats negatives the same as positives —
+    // Math.round(-0.5) is -0 while Math.round(0.5) is 1, and that asymmetry
+    // would make the detent snap disagree with the active index right at the
+    // halfway point between two projects.
+    const roundHalf = (x: number) => Math.floor(x + 0.5)
+    const detent = (r: number) => roundHalf(r / STEP) * STEP
+    const idxOf = (r: number) => ((-roundHalf(r / STEP) % N) + N) % N
+    // Keep the detail panel in sync mid-rotation, not just at rest.
+    const syncActive = (r: number, d: 1 | -1) => {
+      const idx = idxOf(r)
+      if (idx === activeIdx.current) return
+      activeIdx.current = idx
+      setDir(d)
+      setActive(idx)
+    }
+
+    // Paint loop: ease rot toward target and lay the diamonds out on the
+    // circle every frame — bright at the apex, receding toward the back.
+    let raf = 0
+    let lastRot = 0
+    const frame = () => {
+      const { cx, cy, Rd } = geomRef.current
+      const r = rot.current + (target.current - rot.current) * (reduce ? 1 : 0.16)
+      rot.current = Math.abs(target.current - r) < 0.01 ? target.current : r
+
+      diamondRefs.current.forEach((dEl, i) => {
+        if (!dEl) return
+        const a = ((rot.current + i * STEP) * Math.PI) / 180
+        dEl.style.left = `${cx + Rd * Math.cos(a)}px`
+        dEl.style.top = `${cy + Rd * Math.sin(a)}px`
+        const closeness = 0.5 + 0.5 * Math.cos(a) // 1 at apex → 0 at the back
+        dEl.style.opacity = (0.2 + 0.8 * closeness).toFixed(3)
+      })
+
+      if (rot.current !== lastRot) syncActive(rot.current, rot.current < lastRot ? 1 : -1)
+      lastRot = rot.current
+      raf = requestAnimationFrame(frame)
+    }
+    raf = requestAnimationFrame(frame)
+
+    // Wheel spins the dial continuously (never the page), softlocking to the
+    // nearest project once the gesture goes idle.
+    const K = STEP / 160 // deg per wheel-delta unit — one notch comfortably clears a project
+    let idle = 0
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
-      rotation.current += e.deltaY * 0.0026
-      layout()
+      target.current -= e.deltaY * K
+      syncActive(target.current, e.deltaY > 0 ? 1 : -1)
+      window.clearTimeout(idle)
+      idle = window.setTimeout(() => { target.current = detent(target.current) }, 140)
     }
-    el.addEventListener('wheel', onWheel, { passive: false })
+    dial.addEventListener('wheel', onWheel, { passive: false })
+
+    // Drag spins the dial in a circle, 1:1 under the pointer (no easing lag
+    // while grabbing), and settles to the nearest project on release. Drags
+    // can start on the dial surface OR on a diamond — same feel either way;
+    // a small movement threshold keeps plain diamond clicks working.
+    let dragging = false
+    let lastAngle = 0
+    let startX = 0
+    let startY = 0
+    const angleAt = (e: PointerEvent) => {
+      const b = el.getBoundingClientRect()
+      const { cx, cy } = geomRef.current
+      return (Math.atan2(e.clientY - (b.top + cy), e.clientX - (b.left + cx)) * 180) / Math.PI
+    }
+    const startDrag = (e: PointerEvent, capEl: Element) => {
+      dragging = true
+      lastAngle = angleAt(e)
+      startX = e.clientX
+      startY = e.clientY
+      dragDist.current = 0
+      window.clearTimeout(idle)
+      // capture on whatever was grabbed (dial or diamond), so the diamond's
+      // click still fires at the diamond when it wasn't really a drag
+      try { capEl.setPointerCapture(e.pointerId) } catch { /* synthetic pointer */ }
+    }
+    dragStartRef.current = startDrag
+    const onDialDown = (e: PointerEvent) => startDrag(e, dial)
+    const onMove = (e: PointerEvent) => {
+      if (!dragging) return
+      dragDist.current = Math.max(dragDist.current, Math.hypot(e.clientX - startX, e.clientY - startY))
+      const a = angleAt(e)
+      let d = a - lastAngle
+      if (d > 180) d -= 360
+      if (d < -180) d += 360
+      lastAngle = a
+      rot.current += d
+      target.current = rot.current
+      syncActive(rot.current, d < 0 ? 1 : -1)
+    }
+    const onUp = () => {
+      if (!dragging) return
+      dragging = false
+      target.current = detent(target.current)
+      // let the trailing click (which fires right after pointerup) read the
+      // drag distance before it resets
+      window.setTimeout(() => { dragDist.current = 0 }, 0)
+    }
+    dial.addEventListener('pointerdown', onDialDown)
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('pointercancel', onUp)
 
     return () => {
+      cancelAnimationFrame(raf)
+      window.clearTimeout(idle)
       ro.disconnect()
-      el.removeEventListener('wheel', onWheel)
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      dragStartRef.current = null
+      dial.removeEventListener('wheel', onWheel)
+      dial.removeEventListener('pointerdown', onDialDown)
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [N])
+  }, [N, STEP])
 
-  const onDown = (e: React.PointerEvent) => {
-    if ((e.target as HTMLElement).closest('.proj-orbit__center, a')) return
-    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0 }
-    drag.current = { active: true, lastA: angleAt(e.clientX, e.clientY), vel: 0 }
-    try { wrapRef.current!.setPointerCapture(e.pointerId) } catch { /* synthetic */ }
+  const project = category.projects[active] ?? category.projects[0]
+  const { w, h, cx, cy, Rd } = geom
+
+  // Clicking a diamond spins it to the apex by the shortest path. A grab that
+  // actually dragged the dial suppresses the trailing click.
+  const spinTo = (i: number) => {
+    if (dragDist.current > 6) return
+    const base = -i * STEP
+    target.current = base + 360 * Math.round((target.current - base) / 360)
+    setDir(i > activeIdx.current ? 1 : -1)
+    activeIdx.current = i
+    setActive(i)
   }
-  const onMove = (e: React.PointerEvent) => {
-    if (!drag.current.active) return
-    const a = angleAt(e.clientX, e.clientY)
-    let d = a - drag.current.lastA
-    if (d > Math.PI) d -= Math.PI * 2
-    if (d < -Math.PI) d += Math.PI * 2
-    rotation.current += d
-    drag.current.vel = d
-    drag.current.lastA = a
-    layout()
-  }
-  const onUp = (e: React.PointerEvent) => {
-    if (!drag.current.active) return
-    drag.current.active = false
-    try { wrapRef.current!.releasePointerCapture(e.pointerId) } catch { /* already released */ }
-    const spin = () => {
-      rotation.current += drag.current.vel
-      drag.current.vel *= 0.97
-      layout()
-      rafRef.current = Math.abs(drag.current.vel) > 0.0008 ? requestAnimationFrame(spin) : 0
-    }
-    if (Math.abs(drag.current.vel) > 0.0008) rafRef.current = requestAnimationFrame(spin)
+
+  // Initial layout for the first paint; the rAF loop takes over immediately.
+  const posOf = (i: number) => {
+    const a = (i * STEP * Math.PI) / 180
+    return { x: cx + Rd * Math.cos(a), y: cy + Rd * Math.sin(a) }
   }
 
   return (
-    <div
-      className="proj-orbit"
-      ref={wrapRef}
-      onPointerDown={onDown}
-      onPointerMove={onMove}
-      onPointerUp={onUp}
-      onPointerCancel={onUp}
-      role="dialog"
-      aria-label={category.name}
-    >
-      <svg className="proj-orbit__arc" ref={svgRef} aria-hidden="true">
-        <path ref={arcRef} className="proj-orbit__arcline" />
-      </svg>
+    <div className="proj-orbit" ref={wrapRef} role="dialog" aria-label={category.name}>
+      {/* Grab/scroll surface for the dial half — wheel and drag land here (and
+          only here), so dial input never leaks into page scroll. Sits under
+          the diamonds and center button, which stay clickable. */}
+      <div className="proj-orbit__dial" ref={dialRef} aria-hidden="true" />
 
+      {Rd > 0 && (
+        <svg className="proj-orbit__arc" viewBox={`0 0 ${w} ${h}`} aria-hidden="true">
+          <path className="proj-orbit__arcline" d={`M${cx},${cy - Rd} A${Rd},${Rd} 0 0 1 ${cx},${cy + Rd}`} />
+        </svg>
+      )}
+
+      {/* Center label — click to return to the category wheel. */}
       <button className="proj-orbit__center" onClick={onClose}>
         <span className="proj-orbit__title">{category.name}</span>
         <span className="proj-orbit__back">← back</span>
       </button>
 
-      {category.projects.map((p, i) => (
-        <div className="proj-orbit__card" key={p.title} ref={(el) => { cardRefs.current[i] = el }}>
-          <a className="proj-orbit__link" href={p.href} target="_blank" rel="noreferrer">
-            <span className="pill">{p.pill}</span>
-            <span className="proj-orbit__name">{p.title}</span>
-            <span className="proj-orbit__text">{p.text}</span>
-            <span className="tags">{p.tags.map((t) => <span key={t} className="tag">{t}</span>)}</span>
+      {/* Diamond markers — one per project, riding the dial as it spins. */}
+      {Rd > 0 && category.projects.map((p, i) => {
+        const pos = posOf(i)
+        return (
+          <button
+            key={p.title}
+            ref={(el) => { diamondRefs.current[i] = el }}
+            className={`proj-orbit__diamond${i === active ? ' is-active' : ''}`}
+            style={{ left: pos.x, top: pos.y }}
+            onPointerDown={(e) => dragStartRef.current?.(e.nativeEvent, e.currentTarget)}
+            onClick={() => spinTo(i)}
+            aria-label={p.title}
+            title={p.title}
+          />
+        )
+      })}
+
+      {N > 1 && (
+        <div className="proj-orbit__scroll-hint" aria-hidden="true">
+          <svg className="hint-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><rect x="8" y="2.5" width="8" height="13" rx="4"/><line x1="12" y1="6" x2="12" y2="9"/><path d="M9 19.5l3 3 3-3"/></svg>
+          {' · '}
+          <svg className="hint-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="9 19 12 22 15 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+        </div>
+      )}
+
+      {/* Detail + media; re-keyed to replay the entrance, sliding from the
+          direction of travel. */}
+      <div className="proj-orbit__detail" key={active} style={{ '--slide': `${dir * 18}px` } as React.CSSProperties}>
+        <div className="proj-orbit__detail-body">
+          <h3 className="proj-orbit__name">{project.title}</h3>
+          <p className="proj-orbit__text">{project.text}</p>
+          <div className="tags">{project.tags.map((t) => <span key={t} className="tag">{t}</span>)}</div>
+          <a className="btn btn--primary proj-orbit__cta" href={project.href} target="_blank" rel="noreferrer">
+            <svg className="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            View project
           </a>
         </div>
-      ))}
+        <div className="proj-orbit__media">
+          {project.media ? (
+            isVideo(project.media)
+              ? <video src={project.media} autoPlay loop muted playsInline />
+              : <img src={project.media} alt={project.title} loading="lazy" />
+          ) : (
+            <div className="proj-orbit__media-ph" aria-hidden="true">
+              <span>▶</span>
+              <span className="proj-orbit__media-ph-label">image / gif / video</span>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -168,6 +294,20 @@ export default function Projects() {
   const rot = useRef(0)
   const drag = useRef({ active: false, lastAngle: 0, vel: 0 })
   const rafRef = useRef(0)
+  const selectedRef = useRef<number | null>(null)
+  selectedRef.current = selected
+  const lastScrollYRef = useRef(0)
+  const scrollDirRef = useRef(1)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      scrollDirRef.current = currentScrollY > lastScrollYRef.current ? 1 : -1
+      lastScrollYRef.current = currentScrollY
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   useEffect(() => {
     const el = wheelRef.current
@@ -232,6 +372,32 @@ export default function Projects() {
   }
 
   useEffect(() => () => stopMomentum(), [])
+
+  // Intro spin: a quick decaying spin each time the wheel scrolls into view, to
+  // hint that it's draggable. Replays on every re-entry.
+  useEffect(() => {
+    const el = wheelRef.current
+    if (!el) return
+    let wasIn = false
+    const io = new IntersectionObserver((es) => {
+      const isIn = es[0].isIntersecting
+      if (isIn && !wasIn && selectedRef.current === null) {
+        stopMomentum()
+        let v = 12 * scrollDirRef.current
+        const spin = () => {
+          rot.current += v
+          v *= 0.972
+          applyRot()
+          rafRef.current = Math.abs(v) > 0.1 ? requestAnimationFrame(spin) : 0
+        }
+        rafRef.current = requestAnimationFrame(spin)
+      }
+      wasIn = isIn
+    }, { threshold: 0.45 })
+    io.observe(el)
+    return () => io.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const pick = (i: number) => { stopMomentum(); setSelected((prev) => (prev === i ? null : i)) }
 

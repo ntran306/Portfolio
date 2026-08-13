@@ -3,6 +3,59 @@ import { skills } from '../content'
 
 const chipsOf = (v: string) => v.split('•').map((t) => t.trim()).filter(Boolean)
 
+/* Per-skill icons: devicon logos where one exists, emoji for concepts.
+   Keyed by the chip text in content.ts — add a new entry when adding a skill. */
+const DEVICON = 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons'
+const SKILL_ICONS: Record<string, string> = {
+  'Java': `${DEVICON}/java/java-original.svg`,
+  'Python': `${DEVICON}/python/python-original.svg`,
+  'C#': `${DEVICON}/csharp/csharp-original.svg`,
+  'JavaScript': `${DEVICON}/javascript/javascript-original.svg`,
+  'Lua': `${DEVICON}/lua/lua-original.svg`,
+  'Assembly': '⚙️',
+  'SQL': '🗄️',
+  'HTML': `${DEVICON}/html5/html5-original.svg`,
+  'Django': `${DEVICON}/django/django-plain.svg`,
+  'MySQL': `${DEVICON}/mysql/mysql-original.svg`,
+  'PythonAnywhere': '☁️',
+  'Unity': `${DEVICON}/unity/unity-original.svg`,
+  'Unreal Engine': `${DEVICON}/unrealengine/unrealengine-original.svg`,
+  'Blender': `${DEVICON}/blender/blender-original.svg`,
+  'Twilio': '💬',
+  'VR Development': '🥽',
+  'Human-Robot Interaction': '🤖',
+  'Game Design': '🎮',
+  'AI Applications': '🧠',
+  'Web Development': '🌐',
+}
+/* White/dark logos need inverting to stay visible on the dark theme. */
+const INVERT_ICONS = new Set(['Unreal Engine', 'Django', 'Unity'])
+
+/* Icons for the section branches themselves (Languages, Frameworks, …). */
+const SECTION_ICONS: Record<string, string> = {
+  'Languages': '⌨️',
+  'Frameworks': '🧩',
+  'Engines': '⚙️',
+  'Tools': '🛠️',
+  'Specialized': '🚀',
+}
+
+function ChipIcon({ label }: { label: string }) {
+  const icon = SKILL_ICONS[label]
+  if (!icon) return null
+  if (icon.startsWith('http')) {
+    return (
+      <img
+        className={`sk-chip__icon${INVERT_ICONS.has(label) ? ' sk-chip__icon--invert' : ''}`}
+        src={icon}
+        alt=""
+        loading="lazy"
+      />
+    )
+  }
+  return <span className="sk-chip__emoji" aria-hidden="true">{icon}</span>
+}
+
 export default function Skills() {
   const wrapRef = useRef<HTMLDivElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -49,9 +102,9 @@ export default function Skills() {
     const io = new IntersectionObserver(
       (entries) => entries.forEach((e) => {
         if (e.intersectionRatio >= 0.35) setIsIn(true)
-        else if (e.intersectionRatio <= 0.02) setIsIn(false)
+        else if (e.intersectionRatio <= 0.15) { setIsIn(false); setSelected(null) }
       }),
-      { threshold: [0, 0.35] },
+      { threshold: [0, 0.15, 0.35] },
     )
     io.observe(wrap)
     return () => io.disconnect()
@@ -107,11 +160,17 @@ export default function Skills() {
               >
                 <span className="sk-branch__head">
                   <span className="sk-branch__marker" />
+                  {SECTION_ICONS[s.k] && (
+                    <span className="sk-branch__icon" aria-hidden="true">{SECTION_ICONS[s.k]}</span>
+                  )}
                   <span className="sk-branch__name">{s.k}</span>
                 </span>
                 <span className="sk-chips">
                   {chipsOf(s.v).map((t, j) => (
-                    <span className="sk-chip" key={t} style={{ '--j': j } as React.CSSProperties}>{t}</span>
+                    <span className="sk-chip" key={t} style={{ '--j': j } as React.CSSProperties}>
+                      <ChipIcon label={t} />
+                      {t}
+                    </span>
                   ))}
                 </span>
               </button>

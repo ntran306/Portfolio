@@ -1,9 +1,7 @@
 @import "tailwindcss";
 
 :root{
-  --bg: #0b0f14;
-  --panel: rgba(255,255,255,.04);
-  --panel2: rgba(255,255,255,.06);
+  --bg: #060f1d;
   --border: rgba(255,255,255,.10);
   --text: #eaf0ff;
   --muted: rgba(234,240,255,.72);
@@ -22,23 +20,13 @@ body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
   color: var(--text);
-  background: linear-gradient(to bottom, rgba(11,15,20,1) 0%, rgba(15,20,28,1) 20%, rgba(11,15,20,1) 40%, rgba(11,15,20,1) 100%);
+  /* Single flat background color for the whole page (see --bg). */
+  background: var(--bg);
   min-height: 100vh;
   line-height:1.6;
   position: relative;
 }
 
-body::before{
-  content: "";
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(1200px 700px at 20% 10%, rgba(106,166,255,.12), transparent 60%),
-    radial-gradient(900px 600px at 90% 15%, rgba(127,220,255,.08), transparent 55%),
-    radial-gradient(900px 700px at 50% 85%, rgba(106,166,255,.06), transparent 55%);
-  pointer-events: none;
-  z-index: -1;
-}
 
 a{ color:inherit; text-decoration:none; }
 .wrap{ width: 100%; margin: 0 auto; padding: 28px 0px 70px; }
@@ -69,9 +57,10 @@ a{ color:inherit; text-decoration:none; }
   border: 1px solid transparent;
   transition: background .2s ease, border-color .2s ease, color .2s ease;
 }
-.nav__link:hover{ color: var(--text); border-color: rgba(255,255,255,.12); background: rgba(255,255,255,.04); }
+.nav__link:hover{ color: var(--text); }
 .nav__link.active{ color: var(--text); }
 .nav__cta{ border-color: rgba(106,166,255,.22); background: rgba(106,166,255,.08); color: var(--text); }
+.nav__cta:hover{ background: rgba(106,166,255,.14); border-color: rgba(106,166,255,.35); }
 
 /* Mobile menu toggle — hidden on desktop */
 .nav__burger{
@@ -103,12 +92,9 @@ a{ color:inherit; text-decoration:none; }
 }
 
 /* Sections */
-.section{ margin-top: 0; padding: 80px 0; position: relative; }
-.section::before{
-  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 120px;
-  background: linear-gradient(to bottom, rgba(11,15,20,0), rgba(11,15,20,1));
-  pointer-events: none; z-index: 0;
-}
+/* Each section fills the viewport; content sits comfortably below the top
+   (clear of the nav + divider) rather than dead-centered. */
+.section{ margin-top: 0; padding: clamp(80px, 12vh, 140px) 0 80px; position: relative; min-height: 100vh; }
 .section > .content-wrap{ position: relative; z-index: 1; }
 @media (max-width: 720px){ .section{ padding: 60px 0; } }
 
@@ -122,14 +108,75 @@ a{ color:inherit; text-decoration:none; }
   margin: 0; font-size: 14px; font-weight: 700; letter-spacing: .28em; text-transform: uppercase;
   color: var(--blue2); display: inline-flex; align-items: center; gap: 16px;
 }
+/* Flanking lines draw outward from the heading — blue near the text, fading out. */
 .section__head h2::before, .section__head h2::after{
   content: ""; width: 34px; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(127,220,255,.7));
+  transform: scaleX(0);
+  transition: transform .8s cubic-bezier(0.4, 0, 0.2, 1) .15s;
 }
-.section__head h2::before{ transform: scaleX(-1); }
+/* left line: transparent far-left → blue near-text */
+.section__head h2::before{
+  background: linear-gradient(90deg, transparent, rgba(127,220,255,.7));
+  transform-origin: right;
+}
+/* right line: blue near-text → transparent far-right */
+.section__head h2::after{
+  background: linear-gradient(90deg, rgba(127,220,255,.7), transparent);
+  transform-origin: left;
+}
+.section__head.is-visible h2::before{ transform: scaleX(1); }
+.section__head.is-visible h2::after{ transform: scaleX(1); }
 .section__head p{ margin: 0; color: var(--muted); font-size: 14px; }
 
-.panel{ padding: 18px; border-radius: var(--radius); border: 1px solid var(--border); background: rgba(255,255,255,.03); }
+/* About — open, minimal: a small-caps facts line with diamond separators,
+   then the bio as free-standing centered text (no box). */
+.about-info{
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+  margin-top: 8px; text-align: center;
+}
+.about-facts{
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
+  gap: 8px 0; font-size: 12px; font-weight: 700;
+  letter-spacing: .22em; text-transform: uppercase; color: var(--blue2);
+}
+.about-facts__item{ display: inline-flex; align-items: center; }
+.about-facts__dot{
+  width: 6px; height: 6px; margin: 0 16px; border-radius: 1.5px;
+  transform: rotate(45deg); flex-shrink: 0;
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  box-shadow: 0 0 10px rgba(106,166,255,.5);
+}
+.about-bio{
+  margin: 0; max-width: 660px; font-size: 15.5px; line-height: 1.9;
+  color: var(--muted);
+}
+/* Impact stat cards — big gradient number over a small-caps label. */
+.about-stats{
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px;
+  width: 100%; max-width: 840px; margin-top: 12px;
+}
+.stat-card{
+  padding: 20px 12px 18px; border-radius: 16px; text-align: center;
+  border: 1px solid rgba(106,166,255,.16); background: rgba(106,166,255,.05);
+  transition: transform .35s cubic-bezier(0.34,1.56,0.64,1), border-color .3s ease, box-shadow .35s ease;
+}
+.stat-card:hover{
+  transform: translateY(-4px); border-color: rgba(106,166,255,.4);
+  box-shadow: 0 14px 34px rgba(0,0,0,.35), 0 0 18px rgba(106,166,255,.15);
+}
+.stat-card__n{
+  display: block; font-size: clamp(26px, 3vw, 34px); font-weight: 820; line-height: 1;
+  font-variant-numeric: tabular-nums; /* stable width while counting up */
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.stat-card__label{
+  display: block; margin-top: 9px; font-size: 11px; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--muted);
+}
+@media (prefers-reduced-motion: reduce){
+  .stat-card{ transition: none; }
+}
 
 /* Home */
 .home--full{
@@ -150,11 +197,6 @@ a{ color:inherit; text-decoration:none; }
 .bg-3d__layer--a{ background: radial-gradient(circle at 25% 40%, rgba(106,166,255,.52), transparent 58%); transform: translateZ(40px); opacity: .9; }
 .bg-3d__layer--b{ background: radial-gradient(circle at 75% 35%, rgba(127,220,255,.45), transparent 62%); transform: translateZ(80px); opacity: .75; }
 .bg-3d__layer--c{ background: radial-gradient(circle at 55% 70%, rgba(106,166,255,.35), transparent 60%); transform: translateZ(120px); opacity: .65; }
-.bg-3d__shine{
-  position: absolute; inset: 0;
-  background: none;
-  opacity: 0; pointer-events: none;
-}
 /* Reactive 3D isometric name grid */
 .iso-grid{
   position: absolute; inset: 0; z-index: 1;
@@ -174,15 +216,25 @@ a{ color:inherit; text-decoration:none; }
 @keyframes isoBob{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-5px); } }
 @media (max-width: 720px){ .iso-grid{ display: none; } }
 @media (prefers-reduced-motion: reduce){ .iso-cell{ animation: none; } }
+/* Interactive physics ball — fills the home box, behind the hero card.
+   pointer-events is toggled in JS (auto on desktop for grab/throw, none on
+   touch so the page still scrolls). */
+.home-ball{
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 2; display: block; touch-action: none;
+}
 .home__content{
-  position: relative; z-index: 2; width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px;
+  position: relative; z-index: 3; width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px;
   display: flex; flex-direction: column; align-items: center; pointer-events: none;
 }
 .home__content .motion-box, .home__content .btn, .home__content a, .home__content .chip{ pointer-events: auto; }
 .home__card{ position: relative; width: 100%; max-width: 900px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+/* Smooth home→about transition: dissolve the hero (and its glows) into the flat
+   page color. Fades to the exact --bg so there's no hue-mismatch seam. Sits above
+   the background glows (z 0–1) but below the ball/content, and never blocks input. */
 .home__fade{
-  position: absolute; left: 0; right: 0; bottom: 0; height: 200px; z-index: 1;
-  background: linear-gradient(to bottom, rgba(11,15,20,0) 0%, rgba(11,15,20,0.5) 50%, rgba(11,15,20,1) 100%);
+  position: absolute; left: 0; right: 0; bottom: 0; height: 240px; z-index: 1;
+  background: linear-gradient(to bottom, rgba(6,15,29,0) 0%, var(--bg) 100%);
   pointer-events: none;
 }
 .motion-box{
@@ -220,6 +272,7 @@ a{ color:inherit; text-decoration:none; }
   border-color: rgba(106,166,255,.35); color: var(--text);
 }
 .btn--primary:hover{ background: linear-gradient(135deg, rgba(106,166,255,.35), rgba(127,220,255,.22)); border-color: rgba(106,166,255,.5); }
+.btn__icon{ width: 16px; height: 16px; flex-shrink: 0; display: block; }
 .hero__buttons{ display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 
 /* Accent */
@@ -239,8 +292,10 @@ a{ color:inherit; text-decoration:none; }
 
 /* Experience — pinned scroll-driven horizontal timeline */
 .exp .content-wrap{ position: relative; z-index: 2; }
+/* exp section has no section__head above the track — strip the inherited section padding */
+section.exp{ padding: 0; }
 .exp-track{ position: relative; }
-.exp-stage{ position: sticky; top: 0; height: 100vh; overflow: hidden; }
+.exp-stage{ position: sticky; top: 100px; height: 100vh; overflow: hidden; }
 .exp-wave{ position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
 .exp-eyebrow{
   position: absolute; left: 50%; top: 7vh; transform: translateX(-50%); z-index: 4;
@@ -287,8 +342,11 @@ a{ color:inherit; text-decoration:none; }
   50%{ opacity: .75; transform: translateX(-50%) translateY(5px); }
 }
 
-/* Experience — compact fallback list */
-.exp-list{ display: flex; flex-direction: column; gap: 16px; }
+/* Experience — compact fallback list (mobile / reduced-motion).
+   Center the short content within the full-height section so it fills the
+   screen cleanly instead of clumping at the top with a void below. */
+.exp-compact{ display: flex; flex-direction: column; justify-content: center; }
+.exp-list{ display: flex; flex-direction: column; gap: 16px; max-width: 560px; margin-inline: auto; width: 100%; }
 .exp-card--static{
   position: static; left: auto; top: auto; width: auto; opacity: 1;
   transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
@@ -341,43 +399,131 @@ a{ color:inherit; text-decoration:none; }
 .proj-node--e .proj-node__label{ left: 100%; top: 50%; transform: translate(12px, -50%); }
 .proj-node--w .proj-node__label{ right: 100%; top: 50%; transform: translate(-12px, -50%); }
 
-/* Selected: projects orbit a left-anchored circle. Fades in with a soft glow. */
+/* Selected: a left dial of projects + a right detail/media panel. Spans the
+   full stage width (overlays the wheel, which fades out underneath). */
 .proj-orbit{
-  position: absolute; inset: 0; z-index: 5; touch-action: none; cursor: grab;
+  position: absolute; inset: 0; z-index: 5; touch-action: pan-y;
   animation: projOrbitIn .5s ease both;
 }
-.proj-orbit:active{ cursor: grabbing; }
 @keyframes projOrbitIn{ from{ opacity: 0; } to{ opacity: 1; } }
+
+/* Center of the dial — category title; click to return to the wheel. */
+.proj-orbit__center{
+  position: absolute; left: min(13%, 100px); top: 50%; transform: translate(-50%,-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: none; border: none; cursor: pointer; color: var(--text);
+  padding: 14px; z-index: 7; text-align: center; transition: transform .25s ease;
+}
+.proj-orbit__center:hover{ transform: translate(-50%,-50%) scale(1.05); }
+.proj-orbit__title{
+  font-size: clamp(15px, 2vw, 20px); font-weight: 800; max-width: 7em; line-height: 1.2;
+  text-shadow: 0 0 20px rgba(127,220,255,.5);
+}
+.proj-orbit__back{ font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+
+/* Invisible grab/scroll surface over the dial's half. Its width matches the
+   detail panel's left edge, so wheel/drag over the dial drives only the dial
+   (touch-action none blocks page pan) while the detail side scrolls the page
+   normally. Diamonds (z6) and the center button (z7) sit above it. */
+.proj-orbit__dial{
+  position: absolute; top: 0; bottom: 0; left: 0;
+  width: clamp(270px, 38%, 400px);
+  z-index: 5; cursor: grab; touch-action: none;
+}
+.proj-orbit__dial:active{ cursor: grabbing; }
+
+/* The left dial — its arc + orbiting pill labels. */
 .proj-orbit__arc{ position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .proj-orbit__arcline{
   fill: none; stroke: rgba(127,220,255,.28); stroke-width: 1.5; stroke-linecap: round;
   filter: drop-shadow(0 0 6px rgba(127,220,255,.3));
 }
-/* Center title — click to return to the wheel. */
-.proj-orbit__center{
-  position: absolute; left: min(22%, 220px); top: 50%; transform: translate(-50%,-50%);
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  background: none; border: none; cursor: pointer; color: var(--text);
-  padding: 14px; z-index: 6; text-align: center; transition: transform .25s ease;
+/* Diamond markers riding the dial — position and depth-fade are written every
+   frame by the orbit's rAF loop (continuous spin + softlock), so left/top and
+   opacity must NOT be transitioned here. */
+.proj-orbit__diamond{
+  position: absolute; width: 18px; height: 18px; z-index: 6; padding: 0;
+  background: rgba(255,255,255,.05); border: 1.5px solid rgba(106,166,255,.5);
+  border-radius: 3px; cursor: pointer; will-change: left, top, opacity;
+  touch-action: none; /* finger-drags on a diamond spin the dial, not the page */
+  transform: translate(-50%,-50%) rotate(45deg);
+  transition: background .25s ease, box-shadow .3s ease, border-color .25s ease, transform .3s cubic-bezier(0.34,1.56,0.64,1);
 }
-.proj-orbit__center:hover{ transform: translate(-50%,-50%) scale(1.05); }
-.proj-orbit__title{
-  font-size: clamp(16px, 2.4vw, 22px); font-weight: 800; max-width: 8em; line-height: 1.2;
-  text-shadow: 0 0 20px rgba(127,220,255,.5);
+.proj-orbit__diamond:hover{
+  background: rgba(106,166,255,.22); border-color: var(--blue2);
+  box-shadow: 0 0 12px rgba(127,220,255,.35);
+  transform: translate(-50%,-50%) rotate(45deg) scale(1.15);
 }
-.proj-orbit__back{ font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
-/* Cards — no box, just text; the front one is bright, the rest fall back. */
-.proj-orbit__card{ position: absolute; left: 0; top: 0; width: clamp(168px, 24vw, 230px); will-change: transform, opacity; }
-.proj-orbit__link{
-  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
-  color: var(--text); text-decoration: none;
+.proj-orbit__diamond.is-active{
+  background: linear-gradient(135deg, rgba(106,166,255,.6), rgba(127,220,255,.45));
+  border-color: var(--blue2);
+  box-shadow: 0 0 22px rgba(127,220,255,.7), 0 0 44px rgba(127,220,255,.3);
+  transform: translate(-50%,-50%) rotate(45deg) scale(1.4);
 }
-.proj-orbit__name{ font-weight: 720; font-size: 16px; text-shadow: 0 0 16px rgba(106,166,255,.35); }
-.proj-orbit__text{ color: var(--muted); font-size: 13px; line-height: 1.5; }
+.proj-orbit__scroll-hint{
+  position: absolute; left: min(13%, 100px); bottom: 22%; transform: translateX(-50%);
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--muted); opacity: .45; pointer-events: none; z-index: 7;
+  animation: expHint 2.2s ease-in-out infinite;
+}
+.hint-icon{ width: 15px; height: 15px; display: inline-block; vertical-align: middle; }
+
+/* Right panel: explanation on the left, media on the right. */
+.proj-orbit__detail{
+  position: absolute; top: 0; bottom: 0; right: 0;
+  left: clamp(270px, 38%, 400px);
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(200px, 46%);
+  align-items: center; gap: clamp(20px, 3vw, 44px);
+  animation: projDetailIn .45s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+/* --slide is set inline per step: +18px when moving down the list, -18px when
+   moving up, so the panel enters from the direction of travel. */
+@keyframes projDetailIn{ from{ opacity: 0; transform: translateY(var(--slide, 8px)); } to{ opacity: 1; transform: none; } }
+.proj-orbit__detail-body{ display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.proj-orbit__name{ margin: 0; font-weight: 800; font-size: clamp(20px, 2.6vw, 28px); line-height: 1.15; text-shadow: 0 0 22px rgba(127,220,255,.4); }
+.proj-orbit__text{ margin: 0; color: var(--muted); font-size: 15px; line-height: 1.6; }
+.proj-orbit__cta{ margin-top: 6px; }
+
+/* Media box — image / gif / video, or a placeholder until one is set. */
+.proj-orbit__media{
+  position: relative; width: 100%; aspect-ratio: 16 / 10;
+  border-radius: 16px; overflow: hidden;
+  border: 1px solid rgba(106,166,255,.22);
+  background: radial-gradient(circle at 50% 40%, rgba(106,166,255,.10), transparent 70%), rgba(255,255,255,.02);
+  box-shadow: 0 24px 60px rgba(0,0,0,.45);
+}
+.proj-orbit__media img, .proj-orbit__media video{ width: 100%; height: 100%; object-fit: cover; display: block; }
+.proj-orbit__media-ph{
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 8px;
+  color: rgba(127,220,255,.5);
+}
+.proj-orbit__media-ph span:first-child{ font-size: 30px; opacity: .7; }
+.proj-orbit__media-ph-label{ font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: rgba(234,240,255,.4); }
+
+/* Narrow screens: stack the explanation above the media, hide the dial arc and
+   move the back button to a top-left row. */
+@media (max-width: 760px){
+  .proj-orbit__detail{
+    left: 0; top: 52px;
+    grid-template-columns: 1fr; align-content: start; gap: 18px;
+  }
+  .proj-orbit__arc{ display: none; }
+  .proj-orbit__diamond{ display: none; }
+  .proj-orbit__scroll-hint{ display: none; }
+  .proj-orbit__dial{ display: none; }
+  .proj-orbit__center{
+    left: 0; top: 0; transform: none; flex-direction: row; align-items: center;
+    gap: 10px; padding: 4px 0;
+  }
+  .proj-orbit__center:hover{ transform: none; }
+  .proj-orbit__title{ font-size: 16px; }
+}
 
 @media (prefers-reduced-motion: reduce){
-  .proj-orbit{ animation: none; }
-  .proj-node__square{ transition: none; }
+  .proj-orbit, .proj-orbit__detail{ animation: none; }
+  .proj-node__square, .proj-orbit__diamond{ transition: none; }
 }
 
 /* Skills — left-rooted branching tree with a scroll-triggered choreography.
@@ -421,7 +567,7 @@ a{ color:inherit; text-decoration:none; }
    until the section is selected (square marker → diamond, others dim). */
 .sk-branches{
   position: relative; z-index: 1; flex: 1;
-  display: flex; flex-direction: column; gap: clamp(16px, 2.6vw, 30px);
+  display: flex; flex-direction: column; gap: clamp(30px, 5vw, 64px);
 }
 .sk-branch{
   appearance: none; font: inherit; color: inherit; text-align: left;
@@ -448,17 +594,25 @@ a{ color:inherit; text-decoration:none; }
   background: linear-gradient(135deg, var(--blue), var(--blue2));
   border-color: var(--blue2); box-shadow: 0 0 14px rgba(127,220,255,.5);
 }
+.sk-branch__icon{ font-size: 15px; line-height: 1; }
 .sk-branch__name{ font-weight: 740; font-size: 15px; white-space: nowrap; }
 
 /* Skills list — revealed to the right when the section is selected */
-.sk-chips{ display: flex; flex-wrap: wrap; gap: 7px; }
+.sk-chips{ display: flex; flex-wrap: wrap; gap: 8px; }
 .sk-chip{
-  padding: 5px 11px; border-radius: 999px; font-size: 12px; white-space: nowrap;
-  border: 1px solid rgba(106,166,255,.25); background: rgba(106,166,255,.08); color: var(--blue2);
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 13px; border-radius: 999px; font-size: 12.5px; font-weight: 550; white-space: nowrap;
+  border: 1px solid rgba(106,166,255,.22); background: rgba(106,166,255,.07); color: var(--blue2);
   opacity: 0; transform: translateX(-8px);
   transition: opacity .4s ease, transform .4s cubic-bezier(0.34,1.56,0.64,1);
 }
-.sk-branch.is-sel .sk-chip{ opacity: 1; transform: translateX(0); transition-delay: calc(var(--j, 0) * 45ms); }
+.sk-chip__icon{ width: 14px; height: 14px; display: block; flex-shrink: 0; }
+/* dark/monochrome logos flip to white so they read on the dark theme */
+.sk-chip__icon--invert{ filter: invert(1) brightness(1.6); }
+.sk-chip__emoji{ font-size: 12px; line-height: 1; }
+/* Revealed only while the section is selected AND the tree is in view, so the
+   selection fades out when you scroll away and fades back when you return. */
+.sk-tree.is-in .sk-branch.is-sel .sk-chip{ opacity: 1; transform: translateX(0); transition-delay: calc(var(--j, 0) * 45ms); }
 
 @media (max-width: 680px){
   .sk-tree{ flex-direction: column; align-items: flex-start; gap: 14px; }
@@ -471,27 +625,6 @@ a{ color:inherit; text-decoration:none; }
   .sk-root, .sk-branch__head{ opacity: 1 !important; animation: none !important; transform: none !important; }
   .sk-link{ stroke-dashoffset: 0; animation: none; }
   .sk-branch__marker, .sk-chip{ transition: none; }
-}
-
-/* Skills */
-.skills{ display: flex; flex-direction: column; gap: 0; }
-.skill{
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: 14px 0; border-bottom: 1px solid var(--border);
-  opacity: 0; animation: fadeInDown 0.5s forwards;
-}
-.skill:last-child{ border-bottom: none; }
-.panel.is-visible .skill:nth-child(1){ animation-delay: 0.1s; }
-.panel.is-visible .skill:nth-child(2){ animation-delay: 0.25s; }
-.panel.is-visible .skill:nth-child(3){ animation-delay: 0.4s; }
-.panel.is-visible .skill:nth-child(4){ animation-delay: 0.55s; }
-.panel.is-visible .skill:nth-child(5){ animation-delay: 0.7s; }
-.skill__k{ color: var(--muted); font-size: 13px; }
-.skill__v{ font-weight: 740; text-align: right; }
-
-@keyframes fadeInDown{
-  from{ opacity: 0; transform: translateY(-10px); }
-  to{ opacity: 1; transform: translateY(0); }
 }
 
 /* Contact */
@@ -520,25 +653,6 @@ a{ color:inherit; text-decoration:none; }
 .form-status{ margin-top: 16px; padding: 12px 16px; border-radius: 12px; font-size: 14px; text-align: center; display: none; }
 .form-status.success{ display: block; background: rgba(106,255,166,.1); border: 1px solid rgba(106,255,166,.3); color: #6affaa; }
 .form-status.error{ display: block; background: rgba(255,106,106,.1); border: 1px solid rgba(255,106,106,.3); color: #ff6a6a; }
-.contact__divider{ text-align: center; margin: 32px 0; position: relative; }
-.contact__divider::before{ content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--border); }
-.contact__divider span{ position: relative; background: rgba(11,15,20,1); padding: 0 16px; font-size: 13px; color: var(--muted); }
-.contact__direct{ text-align: center; }
-.contact__k{ font-size: 13px; color: var(--muted); margin-bottom: 8px; }
-.contact__v{ font-weight: 820; color: var(--blue); display: block; margin-bottom: 16px; }
-.contact__row{ display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-
-/* Skills list - no box */
-.skills-list{ display: flex; flex-direction: column; gap: 2px; }
-.skill-row{
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: 16px 12px; border-radius: 12px; border: 1px solid transparent;
-  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s cubic-bezier(0.34,1.56,0.64,1), background 0.2s ease, border-color 0.2s ease;
-  cursor: default;
-}
-.skill-row + .skill-row{ border-top: 1px solid var(--border); }
-.skill-row__k{ color: var(--muted); font-size: 13px; min-width: 100px; }
-.skill-row__v{ font-weight: 650; text-align: right; }
 
 /* Contact layout - two column */
 .contact-layout{
@@ -579,6 +693,13 @@ a{ color:inherit; text-decoration:none; }
 /* Footer */
 .footer{ margin-top: 26px; display: flex; justify-content: center; gap: 10px; color: var(--muted); font-size: 13px; }
 
+/* Ambient ocean particle field — fixed behind all content (first node in the
+   tree, z-index 0) so it glows through the transparent sections as you scroll. */
+.ocean-particles{
+  position: fixed; inset: 0; width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+
 /* Reveal */
 .reveal{ opacity: 0; transform: translateY(20px); transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
 .reveal.is-visible{ opacity: 1; transform: translateY(0px); }
@@ -586,7 +707,9 @@ a{ color:inherit; text-decoration:none; }
 .reveal-stagger.is-visible{ opacity: 1; transform: translateY(0px); }
 
 /* Photo diamonds */
-.about-photos{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; margin-bottom: 32px; max-width: 900px; margin-left: auto; margin-right: auto; justify-items: center; }
+/* Extra vertical margin: the hover wave lifts/scales the diamonds, so they
+   need clearance from the heading above and the facts/bio below. */
+.about-photos{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; margin: 32px auto 68px; max-width: 900px; justify-items: center; }
 .photo-diamond{
   position: relative; width: 200px; height: 200px; transform: rotate(45deg);
   overflow: hidden; border-radius: 24px; background: rgba(255,255,255,.03);
@@ -599,10 +722,19 @@ a{ color:inherit; text-decoration:none; }
   transform: rotate(-45deg); color: var(--muted); font-size: 14px; font-weight: 600;
   background: linear-gradient(135deg, rgba(106,166,255,.08), rgba(127,220,255,.05));
 }
-
+/* The tile itself is rotated 45deg, so the photo must counter-rotate to read
+   upright; the scale re-covers the corners the counter-rotation exposes
+   (geometric floor is √2 ≈ 1.4142 — keep just above it for max zoom-out). */
+.photo-diamond__img{
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transform: rotate(-45deg) scale(1.43);
+}
 /* Loader */
 .loader{
-  position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+  position: fixed; inset: 0; z-index: 9999;
+  /* Same flat --bg so revealing the hero doesn't pop a different color. */
+  background: var(--bg);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -622,11 +754,15 @@ textarea:focus-visible, summary:focus-visible, .nav__link:focus-visible{
 
 /* Active nav indicator */
 .nav__link{ position: relative; }
-.nav__link.active:not(.nav__cta)::after{
+.nav__link:not(.nav__cta)::after{
   content: ""; position: absolute; left: 12px; right: 12px; bottom: 3px; height: 2px;
   border-radius: 2px; background: linear-gradient(90deg, var(--blue), var(--blue2));
   box-shadow: 0 0 10px rgba(106,166,255,.6);
+  transform: scaleX(0); transform-origin: center;
+  transition: transform .32s cubic-bezier(0.4, 0, 0.2, 1);
 }
+.nav__link:not(.nav__cta):hover::after,
+.nav__link.active:not(.nav__cta)::after{ transform: scaleX(1); }
 
 /* Custom scrollbar */
 html{ scrollbar-width: thin; scrollbar-color: rgba(106,166,255,.4) transparent; }
@@ -639,11 +775,16 @@ html{ scrollbar-width: thin; scrollbar-color: rgba(106,166,255,.4) transparent; 
 *::-webkit-scrollbar-thumb:hover{ background: rgba(106,166,255,.5); background-clip: padding-box; }
 
 @media (prefers-reduced-motion: reduce){
-  html{ scroll-behavior: auto; }
+  html{ scroll-behavior: auto; scroll-snap-type: none; }
   .reveal{ transition: none; opacity: 1; transform: none; }
   .motion-box, .bg-3d{ transform: none !important; }
   .iso-cell{ animation: none; }
   .exp-hint{ animation: none; }
+  /* Show the eyebrow lines statically, no draw-in */
+  .section__head h2::before, .section__head h2::after{ transition: none; }
+  .section__head h2::before{ transform: scaleX(1); }
+  .section__head h2::after{ transform: scaleX(1); }
+  .nav__link::after{ transition: none; }
 }
 
 @media (max-width: 720px){
