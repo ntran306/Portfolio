@@ -7,9 +7,11 @@
 
 /* ---------- Hero (Home section) ---------- */
 export const hero = {
-  greeting: "Hi, I'm",
-  name: 'Nathan Tran',
-  tagline: 'CS student at Georgia Tech building interactive experiences across games, web, and XR — with research in AI-driven robotics.',
+  // The name sits as a small byline here — the nav and the animated background
+  // grid already carry it, so the headline leads with the work instead.
+  eyebrow: 'Nathan Tran',
+  headline: 'I build things people can play with.',
+  tagline: 'Games, web, and XR — plus VR and robotics research at Georgia Tech.',
 }
 
 /* ---------- Links (used by the hero buttons AND the Contact section) ---------- */
@@ -135,5 +137,5 @@ export const contact = {
   heading: 'Contact',
   subhead: 'Always open to new opportunities',
   // The subject line of contact-form emails is prefixed with this.
-  emailSubjectPrefix: 'NathanTran.com Notification - ',
+  emailSubjectPrefix: 'nathanantran.com — ',
 }

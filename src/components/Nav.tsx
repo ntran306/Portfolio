@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react'
 
 const links = ['home', 'about', 'experience', 'projects', 'skills', 'contact']
 
+/** Pointer must come within this many px of the top edge to summon the nav. */
+const REVEAL_BAND = 96
+
 export default function Nav() {
   const [active, setActive] = useState('home')
   const [open, setOpen] = useState(false)
+  const [nearTop, setNearTop] = useState(false)
 
   useEffect(() => {
     const sections = links.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[]
@@ -18,8 +22,21 @@ export default function Nav() {
     return () => io.disconnect()
   }, [])
 
+  // The nav tucks away once you leave Home so sections get the full viewport;
+  // moving the pointer to the top edge summons it back.
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => setNearTop(e.clientY <= REVEAL_BAND)
+    window.addEventListener('mousemove', onMove, { passive: true })
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [])
+
+  // Always shown on Home; elsewhere only while summoned or while the mobile
+  // menu is open. CSS additionally pins it open on :focus-within (keyboard)
+  // and on touch devices, which have no hover to summon it with.
+  const shown = active === 'home' || nearTop || open
+
   return (
-    <header className="nav">
+    <header className={`nav${shown ? '' : ' is-tucked'}`}>
       <div className="nav__inner">
         <a className="brand" href="#home" aria-label="Go to Home" onClick={() => setOpen(false)}>
           <span className="brand__dot"></span>

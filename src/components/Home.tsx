@@ -53,7 +53,8 @@ export default function Home() {
           <div className="motion-box" id="tiltCard">
             <div className="glass">
               <div className="glass__content">
-                <h1>{hero.greeting} <span className="accent">{hero.name}</span>.</h1>
+                <span className="hero__eyebrow">{hero.eyebrow}</span>
+                <h1>{hero.headline}</h1>
                 <p className="sub">{hero.tagline}</p>
               </div>
             </div>
