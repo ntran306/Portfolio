@@ -51,9 +51,9 @@ auto-detects Vite. For **GitHub Pages** served from a subpath, set
 absolute `/assets/…` paths in `src/content.ts` and `index.html` accordingly; a
 custom domain at the root needs neither change.
 
-### After pointing a domain here
+### Domain
 
-In [`index.html`](index.html), replace the placeholder `/` in `<link rel="canonical">`
-and make the `og:image` / `twitter:image` URLs absolute
-(`https://yourdomain.com/assets/photo1_sq.jpg`) — link-preview scrapers require
-absolute image URLs, so previews stay blank until this is done.
+Live at **https://nathanantran.com**. The canonical, `og:url`, and the
+`og:image` / `twitter:image` URLs in [`index.html`](index.html) are hard-coded to
+that origin — link-preview scrapers require absolute image URLs, so keep them
+absolute if the domain ever changes.

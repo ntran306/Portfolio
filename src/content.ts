@@ -137,5 +137,5 @@ export const contact = {
   heading: 'Contact',
   subhead: 'Always open to new opportunities',
   // The subject line of contact-form emails is prefixed with this.
-  emailSubjectPrefix: 'NathanTran.com Notification - ',
+  emailSubjectPrefix: 'nathanantran.com — ',
 }
