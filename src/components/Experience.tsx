@@ -50,7 +50,7 @@ function ExperienceList() {
         </div>
         <div className="exp-list reveal">
           {experience.items.map((e, i) => (
-            <article key={i} className="exp-card exp-card--static">
+            <article key={i} className="exp-card exp-card--static" style={{ '--i': i } as React.CSSProperties}>
               <div className="exp-card__top">
                 <span className="exp-card__title">{e.title}</span>
                 <span className="pill">{e.year}</span>

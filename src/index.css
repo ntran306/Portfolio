@@ -213,8 +213,36 @@ a{ color:inherit; text-decoration:none; }
   display: block; margin-top: 9px; font-size: 11px; letter-spacing: .13em;
   text-transform: uppercase; color: var(--muted);
 }
+
+/* Small screens: cascade the photos, then the facts / bio / stats, instead of
+   dropping the whole section in at once. The diamonds animate opacity only —
+   their transforms are driven by JS (the hover wave), so touching transform
+   here would fight it. */
+@media (max-width: 820px){
+  .about-photos.reveal .photo-diamond{
+    opacity: 0; transition: opacity .5s ease;
+  }
+  .about-photos.reveal.is-visible .photo-diamond{ opacity: 1; }
+  .about-photos.reveal .photo-diamond:nth-child(2){ transition-delay: 120ms; }
+  .about-photos.reveal .photo-diamond:nth-child(3){ transition-delay: 240ms; }
+
+  .about-info.reveal > *{
+    opacity: 0; transform: translateY(14px);
+    transition: opacity .5s ease, transform .5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .about-info.reveal.is-visible > *{ opacity: 1; transform: none; }
+  .about-info.reveal > *:nth-child(2){ transition-delay: 120ms; }
+  .about-info.reveal > *:nth-child(3){ transition-delay: 240ms; }
+}
+
 @media (prefers-reduced-motion: reduce){
   .stat-card{ transition: none; }
+  /* Never leave staggered content stuck invisible when motion is off. */
+  .about-photos.reveal .photo-diamond,
+  .about-info.reveal > *,
+  .exp-list.reveal .exp-card--static{
+    opacity: 1 !important; transform: none !important; transition: none !important;
+  }
 }
 
 /* Home */
@@ -231,7 +259,7 @@ a{ color:inherit; text-decoration:none; }
   z-index: 2; display: block; touch-action: none;
 }
 .home__content{
-  position: relative; z-index: 3; width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px;
+  position: relative; z-index: 4; width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px;
   display: flex; flex-direction: column; align-items: center; pointer-events: none;
 }
 .home__content .btn, .home__content a{ pointer-events: auto; }
@@ -262,10 +290,11 @@ a{ color:inherit; text-decoration:none; }
 /* Wave divider at the Home → About seam. Strokes rather than fills, since the
    page colour is identical on both sides. Spans the whole section (not just the
    band it paints in) so it shares the ball canvas's coordinate space, letting
-   the ball splash into the surface without any conversion. Sits behind the ball
-   so the ball still reads on top. */
+   the ball splash into the surface without any conversion. Sits ABOVE the ball
+   (z2) so the water body it paints can swallow the ball as it submerges;
+   pointer-events stay off so the ball is still grabbable. */
 .home__waves{
-  position: absolute; inset: 0; z-index: 1;
+  position: absolute; inset: 0; z-index: 3;
   width: 100%; height: 100%;
   display: block; pointer-events: none;
 }
@@ -366,6 +395,18 @@ section.exp{ padding: 0; display: block; }
 .exp-card--static:hover{
   transform: translateY(-3px);
   border-color: rgba(106,166,255,.4); box-shadow: 0 16px 44px rgba(0,0,0,.4);
+}
+/* Small screens get the cards cascading in one after another, which reads far
+   better than the whole stack appearing at once on a narrow column. */
+@media (max-width: 820px){
+  .exp-list.reveal .exp-card--static{
+    opacity: 0; transform: translateY(16px);
+    transition: opacity .5s ease, transform .5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition-delay: calc(var(--i, 0) * 110ms);
+  }
+  .exp-list.reveal.is-visible .exp-card--static{ opacity: 1; transform: none; }
+  /* Hover lift would fight the entrance transform, so re-state it after. */
+  .exp-list.reveal.is-visible .exp-card--static:hover{ transform: translateY(-3px); }
 }
 
 /* Projects — radial wheel */
@@ -628,9 +669,22 @@ section.exp{ padding: 0; display: block; }
 
 @media (max-width: 680px){
   .sk-tree{ flex-direction: column; align-items: flex-start; gap: 14px; }
+  /* The measured SVG curves assume the root sits to the LEFT of the branches;
+     stacked vertically they'd be nonsense, so they're replaced below with a
+     spine + stubs that read as the same tree in a column. */
   .sk-links, .sk-diamond{ display: none; }
-  .sk-branches{ width: 100%; }
-  .sk-branch{ flex-wrap: wrap; gap: 10px 16px; }
+  .sk-branches{ width: 100%; position: relative; padding-left: 20px; }
+  /* Spine: runs from the root's dot down past the last branch. */
+  .sk-branches::before{
+    content: ""; position: absolute; left: 6px; top: -14px; bottom: 12px; width: 1px;
+    background: linear-gradient(180deg, rgba(127,220,255,.55), rgba(127,220,255,.12));
+  }
+  .sk-branch{ flex-wrap: wrap; gap: 10px 16px; position: relative; }
+  /* Stub: spine (x=6) across to each branch marker (x=20). */
+  .sk-branch::before{
+    content: ""; position: absolute; left: -14px; top: 12px; width: 14px; height: 1px;
+    background: rgba(127,220,255,.38);
+  }
 }
 @media (prefers-reduced-motion: reduce){
   .sk-diamond{ display: none; }
@@ -737,9 +791,11 @@ section.exp{ padding: 0; display: block; }
 .reveal-stagger.is-visible{ opacity: 1; transform: translateY(0px); }
 
 /* Photo diamonds */
-/* Extra vertical margin: the hover wave lifts/scales the diamonds, so they
-   need clearance from the heading above and the facts/bio below. */
-.about-photos{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; margin: 32px auto 68px; max-width: 900px; justify-items: center; }
+/* Generous vertical margin. A 200px tile rotated 45deg already reaches ~41px
+   past its layout box (half-diagonal 141 vs half-side 100), and the hover wave
+   adds ~14px of scale plus ~13px of lift on top — so it needs ~70px of headroom
+   before it starts overlapping the section title. */
+.about-photos{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; margin: 84px auto 72px; max-width: 900px; justify-items: center; }
 .photo-diamond{
   position: relative; width: 200px; height: 200px; transform: rotate(45deg);
   overflow: hidden; border-radius: 24px; background: rgba(255,255,255,.03);

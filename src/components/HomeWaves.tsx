@@ -132,6 +132,30 @@ export default function HomeWaves({ ballRef }: { ballRef: React.RefObject<BallSt
       if (w <= 0 || h <= 0) return
       ctx.clearRect(0, 0, w, h)
       const surface = restY()
+      const step = w / (N - 1)
+      const yOf = (L: Layer, i: number) =>
+        surface + L.off
+        + Math.sin(i * step * L.freq + t * L.speed) * L.amp
+        + hgt[i] * L.sim
+
+      // Water body: everything below the leading wave fades to the page colour,
+      // so the ball dissolves as it submerges instead of being sliced off by the
+      // section's clip at the bottom edge. Painted first so the lines stay crisp
+      // on top of it. Colour is --bg (#060f1d) as rgba.
+      const front = LAYERS[LAYERS.length - 1]
+      const body = ctx.createLinearGradient(0, surface, 0, h)
+      body.addColorStop(0, 'rgba(6,15,29,0)')
+      body.addColorStop(0.55, 'rgba(6,15,29,.92)')
+      body.addColorStop(1, 'rgba(6,15,29,1)')
+      ctx.beginPath()
+      ctx.moveTo(0, yOf(front, 0))
+      for (let i = 1; i < N; i++) ctx.lineTo(i * step, yOf(front, i))
+      ctx.lineTo(w, h)
+      ctx.lineTo(0, h)
+      ctx.closePath()
+      ctx.fillStyle = body
+      ctx.fill()
+
       // Fades out at both edges so the waves don't collide with the viewport sides.
       const grad = ctx.createLinearGradient(0, 0, w, 0)
       grad.addColorStop(0, 'rgba(127,220,255,0)')
@@ -140,16 +164,12 @@ export default function HomeWaves({ ballRef }: { ballRef: React.RefObject<BallSt
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
       ctx.strokeStyle = grad
-      const step = w / (N - 1)
       for (const L of LAYERS) {
         ctx.beginPath()
         for (let i = 0; i < N; i++) {
-          const x = i * step
-          const y = surface + L.off
-            + Math.sin(x * L.freq + t * L.speed) * L.amp
-            + hgt[i] * L.sim
-          if (i === 0) ctx.moveTo(x, y)
-          else ctx.lineTo(x, y)
+          const y = yOf(L, i)
+          if (i === 0) ctx.moveTo(0, y)
+          else ctx.lineTo(i * step, y)
         }
         ctx.globalAlpha = L.alpha
         ctx.lineWidth = L.width
