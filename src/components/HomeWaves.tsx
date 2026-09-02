@@ -18,6 +18,17 @@ const K = 0.022     // spring constant pulling a point back to rest
 const DAMP = 0.958  // per-frame velocity damping
 const SPREAD = 0.16 // how strongly a point drags its neighbours
 const PASSES = 2    // neighbour-propagation passes per frame
+const MAX_H = 40    // displacement clamp, so the surface can't thrash
+
+// Ball coupling. Deliberately conservative: the ball can travel up to MAXV
+// (34) px per frame, so an unclamped impulse swamps a surface whose
+// displacement is measured in single pixels.
+const ENTRY_MARGIN = 8   // px the ball's underside must cross the rest line by
+const REACH = 1.1        // horizontal influence, in ball radii
+const MAX_DY = 18        // clamp on the per-frame ball travel feeding a splash
+const DROP_GAIN = 0.14   // how much of that travel becomes surface velocity
+const DEPTH_GAIN = 0.012 // steady push from the submerged volume
+const MAX_PUSH = 3.5     // per-point velocity injection cap
 
 interface Layer {
   off: number    // vertical offset from the rest line
@@ -69,6 +80,10 @@ export default function HomeWaves({ ballRef }: { ballRef: React.RefObject<BallSt
       for (let i = 0; i < N; i++) {
         vel[i] = (vel[i] - K * hgt[i]) * DAMP
         hgt[i] += vel[i]
+        // Hard ceiling on displacement; bleed the velocity so a clamped point
+        // doesn't keep pressing against the limit.
+        if (hgt[i] > MAX_H) { hgt[i] = MAX_H; vel[i] *= 0.5 }
+        else if (hgt[i] < -MAX_H) { hgt[i] = -MAX_H; vel[i] *= 0.5 }
       }
       for (let p = 0; p < PASSES; p++) {
         for (let i = 0; i < N; i++) {
@@ -85,6 +100,9 @@ export default function HomeWaves({ ballRef }: { ballRef: React.RefObject<BallSt
     // Ball → water. Uses the ball's actual per-frame movement rather than its
     // stored velocity so a dragged ball splashes too, and keeps pushing while
     // submerged so it carves a trough instead of pinging once on entry.
+    // Nothing happens until the ball's underside actually crosses the rest
+    // line — gating on the horizontal reach instead would start the splash
+    // while the ball was still a couple of hundred px above the water.
     const disturb = () => {
       const b = ballRef.current
       if (!b || !b.ready || w <= 0) return
@@ -94,9 +112,10 @@ export default function HomeWaves({ ballRef }: { ballRef: React.RefObject<BallSt
 
       const surface = restY()
       const bottom = b.y + b.r
-      const reach = b.r * 1.9
-      if (bottom < surface - reach) return // still well clear of the water
+      if (bottom < surface - ENTRY_MARGIN) return // still above the water line
 
+      const reach = b.r * REACH
+      const drop = Math.max(-MAX_DY, Math.min(MAX_DY, dy))
       const step = w / (N - 1)
       for (let i = 0; i < N; i++) {
         const d = Math.abs(i * step - b.x)
@@ -104,7 +123,8 @@ export default function HomeWaves({ ballRef }: { ballRef: React.RefObject<BallSt
         const f = 1 - d / reach
         const ff = f * f
         const depth = Math.max(0, bottom - (surface + hgt[i]))
-        vel[i] += (dy * 0.42 + depth * 0.035) * ff
+        const push = (drop * DROP_GAIN + depth * DEPTH_GAIN) * ff
+        vel[i] += Math.max(-MAX_PUSH, Math.min(MAX_PUSH, push))
       }
     }
 

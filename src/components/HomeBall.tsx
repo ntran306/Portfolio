@@ -192,7 +192,9 @@ export default function HomeBall({ stateRef }: { stateRef?: React.RefObject<Ball
           if (b.x < b.r) { const s = Math.abs(b.vx); b.x = b.r; b.vx = s * REST; impact(0, b.y, 1, 0, s) }
           else if (b.x > w - b.r) { const s = Math.abs(b.vx); b.x = w - b.r; b.vx = -s * REST; impact(w, b.y, -1, 0, s) }
           if (b.y < b.r) { const s = Math.abs(b.vy); b.y = b.r; b.vy = s * REST; impact(b.x, 0, 0, 1, s) }
-          else if (b.y > h - b.r) { const s = Math.abs(b.vy); b.y = h - b.r; b.vy = -s * REST; impact(b.x, h, 0, -1, s) }
+          // Floor bounces deliberately fire no ripple — that's where the water
+          // surface lives, and the two effects read as noise on top of each other.
+          else if (b.y > h - b.r) { b.y = h - b.r; b.vy = -Math.abs(b.vy) * REST }
           if (Math.hypot(b.vx, b.vy) < 0.25) { b.vx += (Math.random() - 0.5) * 0.25; b.vy += (Math.random() - 0.5) * 0.25 }
         }
         b.rotY += b.vx * 0.004 + 0.0035
