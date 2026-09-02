@@ -223,25 +223,6 @@ a{ color:inherit; text-decoration:none; }
   display: flex; align-items: center; justify-content: center;
   overflow: hidden; margin: 0; padding: 50px 0 0 0;
 }
-/* Reactive 3D isometric name grid */
-.iso-grid{
-  position: absolute; inset: 0; z-index: 1;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 10px; opacity: 0.5; overflow: hidden;
-  pointer-events: none; user-select: none;
-}
-.iso-row{ display: flex; gap: 40px; flex-shrink: 0; }       /* gap between whole-name words */
-.iso-word{ display: flex; }
-/* Overlap the fixed-width glyph cells so each NATHAN reads as one tight word
-   (CSS gap can't go negative, so use negative margin). */
-.iso-word > .iso-cell + .iso-cell{ margin-left: -44px; }
-.iso-cell{
-  display: block; will-change: transform, filter;
-  animation: isoBob 3.4s ease-in-out infinite;
-}
-@keyframes isoBob{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-5px); } }
-@media (max-width: 720px){ .iso-grid{ display: none; } }
-@media (prefers-reduced-motion: reduce){ .iso-cell{ animation: none; } }
 /* Interactive physics ball — fills the home box, behind the hero card.
    pointer-events is toggled in JS (auto on desktop for grab/throw, none on
    touch so the page still scrolls). */
@@ -278,18 +259,16 @@ a{ color:inherit; text-decoration:none; }
   color: var(--muted); text-shadow: 0 2px 18px rgba(6,15,29,.9);
 }
 
-/* Wave divider at the Home → About seam. Stroked, not filled: the page colour
-   is the same on both sides, so a filled shape would have nothing to contrast
-   against. Sits behind the ball so the ball still reads on top. */
+/* Wave divider at the Home → About seam. Strokes rather than fills, since the
+   page colour is identical on both sides. Spans the whole section (not just the
+   band it paints in) so it shares the ball canvas's coordinate space, letting
+   the ball splash into the surface without any conversion. Sits behind the ball
+   so the ball still reads on top. */
 .home__waves{
-  position: absolute; left: 0; right: 0; bottom: 0; z-index: 1;
-  width: 100%; height: clamp(110px, 16vh, 180px);
+  position: absolute; inset: 0; z-index: 1;
+  width: 100%; height: 100%;
   display: block; pointer-events: none;
 }
-.home__wave{ fill: none; stroke: url(#homeWaveFade); stroke-linecap: round; }
-.home__wave--front{ stroke-width: 2; opacity: .8; }
-.home__wave--mid{ stroke-width: 1.5; opacity: .45; }
-.home__wave--back{ stroke-width: 1.2; opacity: .28; }
 
 /* Buttons */
 .btn{
@@ -828,7 +807,6 @@ html{ scrollbar-width: thin; scrollbar-color: rgba(106,166,255,.4) transparent; 
 @media (prefers-reduced-motion: reduce){
   html{ scroll-behavior: auto; scroll-snap-type: none; }
   .reveal{ transition: none; opacity: 1; transform: none; }
-  .iso-cell{ animation: none; }
   .exp-hint{ animation: none; }
   /* Show the eyebrow lines statically, no draw-in */
   .section__head h2::before, .section__head h2::after{ transition: none; }

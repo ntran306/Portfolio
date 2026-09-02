@@ -35,7 +35,15 @@ const MAXV = 34         // throw speed cap
 const SH_SMALL = 250    // shatter when the box min-dimension drops below this
 const SH_BIG = 320      // rebuild once it grows back above this (hysteresis)
 
-export default function HomeBall() {
+/** Live ball position, published each frame so HomeWaves can splash off it. */
+export interface BallState {
+  x: number; y: number; r: number
+  /** Per-frame movement, so a dragged ball disturbs the water too. */
+  vx: number; vy: number
+  ready: boolean
+}
+
+export default function HomeBall({ stateRef }: { stateRef?: React.RefObject<BallState> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -198,6 +206,16 @@ export default function HomeBall() {
         if (p.life <= 0) parts.splice(i, 1)
       }
       pulse *= 0.93
+      // Publish for the wave sim. Mutated in place rather than reassigned so the
+      // per-frame loop stays allocation-free; while dragging, the pointer delta
+      // is the real velocity (b.vx/vy are pinned to 0 by the drag).
+      const s = stateRef?.current
+      if (s) {
+        s.x = b.x; s.y = b.y; s.r = b.r
+        s.vx = drag.active ? drag.vx : b.vx
+        s.vy = drag.active ? drag.vy : b.vy
+        s.ready = started && sh.v < 0.9
+      }
       render()
     }
 
