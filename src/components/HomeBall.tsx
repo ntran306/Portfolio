@@ -35,7 +35,15 @@ const MAXV = 34         // throw speed cap
 const SH_SMALL = 250    // shatter when the box min-dimension drops below this
 const SH_BIG = 320      // rebuild once it grows back above this (hysteresis)
 
-export default function HomeBall() {
+/** Live ball position, published each frame so HomeWaves can splash off it. */
+export interface BallState {
+  x: number; y: number; r: number
+  /** Per-frame movement, so a dragged ball disturbs the water too. */
+  vx: number; vy: number
+  ready: boolean
+}
+
+export default function HomeBall({ stateRef }: { stateRef?: React.RefObject<BallState> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -184,7 +192,9 @@ export default function HomeBall() {
           if (b.x < b.r) { const s = Math.abs(b.vx); b.x = b.r; b.vx = s * REST; impact(0, b.y, 1, 0, s) }
           else if (b.x > w - b.r) { const s = Math.abs(b.vx); b.x = w - b.r; b.vx = -s * REST; impact(w, b.y, -1, 0, s) }
           if (b.y < b.r) { const s = Math.abs(b.vy); b.y = b.r; b.vy = s * REST; impact(b.x, 0, 0, 1, s) }
-          else if (b.y > h - b.r) { const s = Math.abs(b.vy); b.y = h - b.r; b.vy = -s * REST; impact(b.x, h, 0, -1, s) }
+          // Floor bounces deliberately fire no ripple — that's where the water
+          // surface lives, and the two effects read as noise on top of each other.
+          else if (b.y > h - b.r) { b.y = h - b.r; b.vy = -Math.abs(b.vy) * REST }
           if (Math.hypot(b.vx, b.vy) < 0.25) { b.vx += (Math.random() - 0.5) * 0.25; b.vy += (Math.random() - 0.5) * 0.25 }
         }
         b.rotY += b.vx * 0.004 + 0.0035
@@ -198,6 +208,16 @@ export default function HomeBall() {
         if (p.life <= 0) parts.splice(i, 1)
       }
       pulse *= 0.93
+      // Publish for the wave sim. Mutated in place rather than reassigned so the
+      // per-frame loop stays allocation-free; while dragging, the pointer delta
+      // is the real velocity (b.vx/vy are pinned to 0 by the drag).
+      const s = stateRef?.current
+      if (s) {
+        s.x = b.x; s.y = b.y; s.r = b.r
+        s.vx = drag.active ? drag.vx : b.vx
+        s.vy = drag.active ? drag.vy : b.vy
+        s.ready = started && sh.v < 0.9
+      }
       render()
     }
 

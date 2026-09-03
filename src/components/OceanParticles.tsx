@@ -60,6 +60,10 @@ export default function OceanParticles() {
     }
 
     const draw = (dt: number) => {
+      // A zero-size viewport (orientation change, hidden or embedded contexts)
+      // makes the y/H depth ratio in sizeForY non-finite, which throws inside
+      // createRadialGradient. There's nothing to paint at that size anyway.
+      if (W <= 0 || H <= 0) return
       ctx.clearRect(0, 0, W, H)
       t += dt
 
