@@ -298,7 +298,11 @@ function ExperiencePinned() {
             ))}
           </div>
 
-          <div className="exp-hint" aria-hidden="true">scroll</div>
+          {/* Same mouse glyph as the Projects dial hint, so "keep scrolling"
+              reads identically everywhere on the site. */}
+          <div className="exp-hint" aria-hidden="true">
+            <svg className="hint-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="8" y="2.5" width="8" height="13" rx="4"/><line x1="12" y1="6" x2="12" y2="9"/><path d="M9 19.5l3 3 3-3"/></svg>
+          </div>
         </div>
       </div>
     </section>

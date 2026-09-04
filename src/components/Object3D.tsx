@@ -135,8 +135,12 @@ export default function Object3D() {
 
   return (
     <div className="contact-obj">
-      <canvas ref={canvasRef} className="contact-obj__canvas" aria-label="Interactive 3D object placeholder — drag to rotate" />
-      <span className="contact-obj__hint">drag to rotate</span>
+      {/* The canvas keeps the wording in its label, so dropping the visible
+          text below doesn't cost screen-reader users the instruction. */}
+      <canvas ref={canvasRef} className="contact-obj__canvas" aria-label="Interactive 3D object — drag to rotate" />
+      <span className="contact-obj__hint" aria-hidden="true">
+        <svg className="hint-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </span>
     </div>
   )
 }

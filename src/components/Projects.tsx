@@ -224,9 +224,13 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
       )}
 
       {/* Center label — click to return to the category wheel. */}
-      <button className="proj-orbit__center" onClick={onClose}>
+      {/* The visible label is the category name; the arrow carries the action,
+          so the button states its purpose via aria-label instead. */}
+      <button className="proj-orbit__center" onClick={onClose} aria-label="Back to all categories">
         <span className="proj-orbit__title">{category.name}</span>
-        <span className="proj-orbit__back">← back</span>
+        <span className="proj-orbit__back" aria-hidden="true">
+          <svg className="hint-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </span>
       </button>
 
       {/* Diamond markers — one per project, riding the dial as it spins. */}

@@ -374,10 +374,12 @@ section.exp{ padding: 0; display: block; }
 /* Clear of the bottom edge veil so the scroll affordance stays legible. */
 .exp-hint{
   position: absolute; left: 50%; bottom: 92px; transform: translateX(-50%);
-  font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+  display: inline-flex; align-items: center;
   color: var(--muted); z-index: 4; pointer-events: none;
   animation: expHint 2s ease-in-out infinite;
 }
+/* A touch larger here than the inline dial hints — this one stands alone. */
+.exp-hint .hint-icon{ width: 19px; height: 19px; }
 @keyframes expHint{
   0%,100%{ opacity: .3; transform: translateX(-50%) translateY(0); }
   50%{ opacity: .75; transform: translateX(-50%) translateY(5px); }
@@ -472,7 +474,7 @@ section.exp{ padding: 0; display: block; }
   font-size: clamp(15px, 2vw, 20px); font-weight: 800; max-width: 7em; line-height: 1.2;
   text-shadow: 0 0 20px rgba(127,220,255,.5);
 }
-.proj-orbit__back{ font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.proj-orbit__back{ display: inline-flex; align-items: center; color: var(--muted); }
 
 /* Invisible grab/scroll surface over the dial's half. Its width matches the
    detail panel's left edge, so wheel/drag over the dial drives only the dial
@@ -764,7 +766,7 @@ section.exp{ padding: 0; display: block; }
 .contact-obj__canvas:active{ cursor: grabbing; }
 .contact-obj__hint{
   position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
-  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  display: inline-flex; align-items: center;
   color: var(--muted); opacity: .55; pointer-events: none;
 }
 /* Keep the link row locked to the object's width at every breakpoint, or their
