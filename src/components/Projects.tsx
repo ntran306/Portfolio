@@ -224,9 +224,13 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
       )}
 
       {/* Center label — click to return to the category wheel. */}
-      <button className="proj-orbit__center" onClick={onClose}>
+      {/* The visible label is the category name; the arrow carries the action,
+          so the button states its purpose via aria-label instead. */}
+      <button className="proj-orbit__center" onClick={onClose} aria-label="Back to all categories">
         <span className="proj-orbit__title">{category.name}</span>
-        <span className="proj-orbit__back">← back</span>
+        <span className="proj-orbit__back" aria-hidden="true">
+          <svg className="hint-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </span>
       </button>
 
       {/* Diamond markers — one per project, riding the dial as it spins. */}
@@ -261,10 +265,14 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
           <h3 className="proj-orbit__name">{project.title}</h3>
           <p className="proj-orbit__text">{project.text}</p>
           <div className="tags">{project.tags.map((t) => <span key={t} className="tag">{t}</span>)}</div>
-          <a className="btn btn--primary proj-orbit__cta" href={project.href} target="_blank" rel="noreferrer">
-            <svg className="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            View project
-          </a>
+          {/* Hidden entirely when there's nothing public to link, rather than
+              rendering a button that goes nowhere. */}
+          {project.href && (
+            <a className="btn btn--primary proj-orbit__cta" href={project.href} target="_blank" rel="noreferrer">
+              <svg className="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              View project
+            </a>
+          )}
         </div>
         <div className="proj-orbit__media">
           {project.media ? (
