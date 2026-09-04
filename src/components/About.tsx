@@ -20,7 +20,7 @@ function AboutStats() {
 
     const setFinals = () => numRefs.current.forEach((el, i) => {
       const s = about.stats[i]
-      if (el && s) el.textContent = `${s.value}${s.suffix}`
+      if (el && s) el.textContent = `${s.prefix}${s.value}${s.suffix}`
     })
 
     const run = () => {
@@ -34,7 +34,7 @@ function AboutStats() {
         const e = 1 - Math.pow(1 - p, 3)
         numRefs.current.forEach((el, i) => {
           const s = about.stats[i]
-          if (el && s) el.textContent = `${Math.round(s.value * e)}${s.suffix}`
+          if (el && s) el.textContent = `${s.prefix}${Math.round(s.value * e)}${s.suffix}`
         })
         if (p < 1) raf = requestAnimationFrame(tick)
       }
@@ -56,7 +56,7 @@ function AboutStats() {
       {about.stats.map((s, i) => (
         <div className="stat-card" key={s.label}>
           <span className="stat-card__n" ref={(el) => { numRefs.current[i] = el }}>
-            {s.value}{s.suffix}
+            {s.prefix}{s.value}{s.suffix}
           </span>
           <span className="stat-card__label">{s.label}</span>
         </div>

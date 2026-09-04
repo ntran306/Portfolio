@@ -7,37 +7,60 @@ const chipsOf = (v: string) => v.split('•').map((t) => t.trim()).filter(Boolea
    Keyed by the chip text in content.ts — add a new entry when adding a skill. */
 const DEVICON = 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons'
 const SKILL_ICONS: Record<string, string> = {
+  // Languages
   'Java': `${DEVICON}/java/java-original.svg`,
   'Python': `${DEVICON}/python/python-original.svg`,
+  'C': `${DEVICON}/c/c-original.svg`,
   'C#': `${DEVICON}/csharp/csharp-original.svg`,
   'JavaScript': `${DEVICON}/javascript/javascript-original.svg`,
+  'SQL': '🗄️',
   'Lua': `${DEVICON}/lua/lua-original.svg`,
   'Assembly': '⚙️',
-  'SQL': '🗄️',
-  'HTML': `${DEVICON}/html5/html5-original.svg`,
+  'HTML/CSS': `${DEVICON}/html5/html5-original.svg`,
+  // Frameworks
   'Django': `${DEVICON}/django/django-plain.svg`,
-  'MySQL': `${DEVICON}/mysql/mysql-original.svg`,
-  'PythonAnywhere': '☁️',
+  'FastAPI': `${DEVICON}/fastapi/fastapi-original.svg`,
+  'React': `${DEVICON}/react/react-original.svg`,
   'Unity': `${DEVICON}/unity/unity-original.svg`,
   'Unreal Engine': `${DEVICON}/unrealengine/unrealengine-original.svg`,
-  'Blender': `${DEVICON}/blender/blender-original.svg`,
+  // Libraries
+  'MediaPipe': '✋',
+  'OpenCV': `${DEVICON}/opencv/opencv-original.svg`,
+  'NumPy': `${DEVICON}/numpy/numpy-original.svg`,
+  'pygame': '🎮',
+  'moderngl': '🔺',
+  // Tools
+  // Devicon only ships wide *wordmark* variants for AWS, which are illegible in
+  // a 14px chip, so this one stays an emoji.
+  'AWS': '☁️',
+  'Terraform': `${DEVICON}/terraform/terraform-original.svg`,
+  'Docker': `${DEVICON}/docker/docker-original.svg`,
+  'Git': `${DEVICON}/git/git-original.svg`,
+  'GitHub': `${DEVICON}/github/github-original.svg`,
+  'PostgreSQL': `${DEVICON}/postgresql/postgresql-original.svg`,
+  'MySQL': `${DEVICON}/mysql/mysql-original.svg`,
   'Twilio': '💬',
-  'VR Development': '🥽',
-  'Human-Robot Interaction': '🤖',
-  'Game Design': '🎮',
-  'AI Applications': '🧠',
-  'Web Development': '🌐',
+  'Blender': `${DEVICON}/blender/blender-original.svg`,
+  // Concepts
+  'Full-Stack': '🧱',
+  'Backend': '🗃️',
+  'Frontend': '🖥️',
+  'REST APIs': '🔌',
+  'CI/CD': '🔁',
+  'Automation': '🤖',
+  'Agile/Scrum': '🏃',
+  'DevOps': '♾️',
 }
 /* White/dark logos need inverting to stay visible on the dark theme. */
-const INVERT_ICONS = new Set(['Unreal Engine', 'Django', 'Unity'])
+const INVERT_ICONS = new Set(['Unreal Engine', 'Django', 'Unity', 'GitHub'])
 
 /* Icons for the section branches themselves (Languages, Frameworks, …). */
 const SECTION_ICONS: Record<string, string> = {
   'Languages': '⌨️',
   'Frameworks': '🧩',
-  'Engines': '⚙️',
+  'Libraries': '📚',
   'Tools': '🛠️',
-  'Specialized': '🚀',
+  'Concepts': '🧠',
 }
 
 function ChipIcon({ label }: { label: string }) {
