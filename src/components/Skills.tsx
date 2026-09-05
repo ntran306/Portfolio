@@ -29,6 +29,9 @@ const SKILL_ICONS: Record<string, string> = {
   'NumPy': `${DEVICON}/numpy/numpy-original.svg`,
   'pygame': '🎮',
   'moderngl': '🔺',
+  'JAX': '🧮',
+  'Flax': '🕸️',
+  'HuggingFace': '🤗',
   // Tools
   // Devicon only ships wide *wordmark* variants for AWS, which are illegible in
   // a 14px chip, so this one stays an emoji.
@@ -57,7 +60,7 @@ const INVERT_ICONS = new Set(['Unreal Engine', 'Django', 'Unity', 'GitHub'])
 /* Icons for the section branches themselves (Languages, Frameworks, …). */
 const SECTION_ICONS: Record<string, string> = {
   'Languages': '⌨️',
-  'Frameworks': '🧩',
+  'Frameworks & Engines': '🧩',
   'Libraries': '📚',
   'Tools': '🛠️',
   'Concepts': '🧠',
