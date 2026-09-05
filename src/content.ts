@@ -179,8 +179,8 @@ export const skills = {
   subhead: 'Technologies I work with.',
   items: [
     { k: 'Languages', v: 'Java • Python • C • C# • JavaScript • SQL • Lua • Assembly • HTML/CSS' },
-    { k: 'Frameworks', v: 'Django • FastAPI • React • Unity • Unreal Engine' },
-    { k: 'Libraries', v: 'MediaPipe • OpenCV • NumPy • pygame • moderngl' },
+    { k: 'Frameworks & Engines', v: 'Django • FastAPI • React • Unity • Unreal Engine' },
+    { k: 'Libraries', v: 'MediaPipe • OpenCV • NumPy • pygame • moderngl • JAX • Flax • HuggingFace' },
     { k: 'Tools', v: 'AWS • Terraform • Docker • Git • GitHub • PostgreSQL • MySQL • Twilio • Blender' },
     { k: 'Concepts', v: 'Full-Stack • Backend • Frontend • REST APIs • CI/CD • Automation • Agile/Scrum • DevOps' },
   ] satisfies Skill[],
