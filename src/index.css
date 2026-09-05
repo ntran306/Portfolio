@@ -620,14 +620,20 @@ section.exp{ padding: 0; display: block; }
 
 /* Sections — clickable rows; no outer box. Skills sit to the right, hidden
    until the section is selected (square marker → diamond, others dim). */
+/* Rows are short and uniform now that collapsed chips take no height, so the
+   gap carries the breathing room. Keyed to viewport HEIGHT, not width: the
+   constraint here is vertical, and a vw-based gap gives a wide-but-short laptop
+   a gap it can't afford (1440x760 was left with 3px to spare once a branch
+   expanded). */
 .sk-branches{
   position: relative; z-index: 1; flex: 1;
-  display: flex; flex-direction: column; gap: clamp(30px, 5vw, 64px);
+  display: flex; flex-direction: column; gap: clamp(28px, 6vh, 64px);
 }
 .sk-branch{
   appearance: none; font: inherit; color: inherit; text-align: left;
   background: none; border: none; cursor: pointer; width: 100%;
-  display: flex; align-items: center; gap: 24px;
+  /* 34px against the wrapper's -10px margin reads as the intended 24px. */
+  display: flex; align-items: center; gap: 34px;
   transition: opacity .3s ease;
 }
 .sk-tree.has-sel .sk-branch:not(.is-sel){ opacity: .3; }
@@ -652,8 +658,25 @@ section.exp{ padding: 0; display: block; }
 .sk-branch__icon{ font-size: 15px; line-height: 1; }
 .sk-branch__name{ font-weight: 740; font-size: 15px; white-space: nowrap; }
 
-/* Skills list — revealed to the right when the section is selected */
-.sk-chips{ display: flex; flex-wrap: wrap; gap: 8px; }
+/* Skills list — revealed to the right when the section is selected.
+   The wrapper must collapse to zero height while unselected: the chips are only
+   faded out, so left in flow every branch would be as tall as its chip list —
+   both overflowing the viewport and making rows uneven (one chip row vs two).
+   0fr -> 1fr animates to the exact content height; a max-height guess would
+   finish revealing early and then sit still for the rest of the transition. */
+.sk-chips-wrap{
+  display: grid; grid-template-rows: 0fr; min-width: 0;
+  margin-left: -10px; /* cancels the padding below */
+  transition: grid-template-rows .5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sk-tree.is-in .sk-branch.is-sel .sk-chips-wrap{ grid-template-rows: 1fr; }
+.sk-chips{
+  display: flex; flex-wrap: wrap; gap: 8px;
+  min-height: 0; overflow: hidden; /* both required for the 0fr collapse */
+  /* Left room only — vertical padding would survive the collapse and stop the
+     row reaching zero. Keeps the chips' -8px entrance slide from being clipped. */
+  padding-left: 10px;
+}
 .sk-chip{
   display: inline-flex; align-items: center; gap: 7px;
   padding: 6px 13px; border-radius: 999px; font-size: 12.5px; font-weight: 550; white-space: nowrap;
