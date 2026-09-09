@@ -1,10 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- N monogram, no backing plate — the mark sits straight on whatever the
+       browser paints behind the tab, so it works in light and dark chrome.
+       Solid rather than monoline: at 16px, which is where a favicon actually
+       lives, the weight is what keeps it reading as a letter.
+       Gradient runs the same 135deg blue -> cyan as the nav brand dot. -->
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#6aa6ff"/>
       <stop offset="1" stop-color="#7fdcff"/>
     </linearGradient>
   </defs>
-  <rect width="32" height="32" rx="7" fill="#060f1d"/>
-  <path d="M16 5.5 26.5 16 16 26.5 5.5 16z" fill="url(#g)"/>
+  <path d="M5 27V5h6.4l9.2 14.2V5H27v22h-6.4l-9.2-14.2V27z" fill="url(#g)"/>
 </svg>
