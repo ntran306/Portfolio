@@ -85,7 +85,6 @@ export const experience = {
       text: 'Built an app catalog mapping dependencies across 200+ applications, and provisioned AWS infrastructure with Terraform to automate dependency and cost extraction across 12,000+ resources — surfacing $100,000+ in potential annual cloud savings.',
       tags: ['AWS', 'Terraform', 'Python'],
       logo: '/assets/logo-georgia-pacific.png',
-      logoFit: 'plate',
     },
     {
       title: 'Autorobotics in Construction — Undergraduate Researcher',
@@ -101,7 +100,6 @@ export const experience = {
       text: 'Providing in-home nursing support — diet monitoring, mobility assistance, and technological aid — alongside the companionship and reliable communication that keep clients comfortable and independent.',
       tags: ['Care', 'Communication'],
       logo: '/assets/logo-viet-home-care.png',
-      logoFit: 'plate',
     },
   ] satisfies Experience[],
 }
