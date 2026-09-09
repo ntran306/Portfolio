@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { experience } from '../content'
+import { experience, type Experience as ExperienceItem } from '../content'
 
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v)
 const smooth = (t: number) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t) }
@@ -39,6 +39,36 @@ export default function Experience() {
   return compact ? <ExperienceList /> : <ExperiencePinned />
 }
 
+/* ---------- Card header ---------- */
+/* A logo whose file isn't there yet drops out entirely rather than leaving an
+   empty tile — the title just sits on its own, exactly as it does for an entry
+   with no logo at all. */
+function ExpLogo({ item }: { item: ExperienceItem }) {
+  const [failed, setFailed] = useState(false)
+  if (!item.logo || failed) return null
+  return (
+    <img
+      className={`exp-card__logo${item.logoFit ? ` exp-card__logo--${item.logoFit}` : ''}`}
+      src={item.logo}
+      alt=""
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
+/* Logo + title + year, shared by both variants so the row is described once. */
+function ExpCardHead({ item }: { item: ExperienceItem }) {
+  return (
+    <div className="exp-card__top">
+      <span className="exp-card__id">
+        <ExpLogo item={item} />
+        <span className="exp-card__title">{item.title}</span>
+      </span>
+      <span className="pill">{item.year}</span>
+    </div>
+  )
+}
+
 /* ---------- Compact / reduced-motion fallback ---------- */
 function ExperienceList() {
   return (
@@ -51,10 +81,7 @@ function ExperienceList() {
         <div className="exp-list reveal">
           {experience.items.map((e, i) => (
             <article key={i} className="exp-card exp-card--static" style={{ '--i': i } as React.CSSProperties}>
-              <div className="exp-card__top">
-                <span className="exp-card__title">{e.title}</span>
-                <span className="pill">{e.year}</span>
-              </div>
+              <ExpCardHead item={e} />
               <p className="exp-card__text">{e.text}</p>
               <div className="tags">{e.tags.map(t => <span key={t} className="tag">{t}</span>)}</div>
             </article>
@@ -282,10 +309,7 @@ function ExperiencePinned() {
           <div className="exp-cards">
             {experience.items.map((e, i) => (
               <div key={i} className="exp-card" ref={(el) => { cardRefs.current[i] = el }}>
-                <div className="exp-card__top">
-                  <span className="exp-card__title">{e.title}</span>
-                  <span className="pill">{e.year}</span>
-                </div>
+                <ExpCardHead item={e} />
                 <p className="exp-card__text">{e.text}</p>
                 <div className="tags">{e.tags.map(t => <span key={t} className="tag">{t}</span>)}</div>
               </div>

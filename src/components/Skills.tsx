@@ -191,13 +191,17 @@ export default function Skills() {
                   )}
                   <span className="sk-branch__name">{s.k}</span>
                 </span>
-                <span className="sk-chips">
-                  {chipsOf(s.v).map((t, j) => (
-                    <span className="sk-chip" key={t} style={{ '--j': j } as React.CSSProperties}>
-                      <ChipIcon label={t} />
-                      {t}
-                    </span>
-                  ))}
+                {/* The wrapper collapses to zero height while unselected, so a
+                    branch is only as tall as its name (see .sk-chips-wrap). */}
+                <span className="sk-chips-wrap">
+                  <span className="sk-chips">
+                    {chipsOf(s.v).map((t, j) => (
+                      <span className="sk-chip" key={t} style={{ '--j': j } as React.CSSProperties}>
+                        <ChipIcon label={t} />
+                        {t}
+                      </span>
+                    ))}
+                  </span>
                 </span>
               </button>
             ))}
