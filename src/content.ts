@@ -36,12 +36,13 @@ export const about = {
   heading: 'About',
   // Short facts line shown between the photos and the bio.
   facts: ['Georgia Tech', 'CS + FinTech', 'Atlanta, GA'],
-  bio: "I'm a Computer Science student at Georgia Tech minoring in FinTech, drawn to problems where a system has to see, decide, or scale. Lately that's meant mapping 12,000+ cloud resources as a data engineering intern at Georgia-Pacific, building VR training scenarios for construction safety research, and writing game-playing AI agents that reason under uncertainty. Outside class I'm part of VGDev and GT Swim Club, and I spend my free time on calisthenics, bouldering, MMA, and piano. Always looking for the next thing to build.",
+  // Shown on its own line under the facts — too long to sit in that chip row.
+  concentration: 'Information Internetworks & Intelligence (AI)',
+  bio: "I'm a Computer Science student at Georgia Tech minoring in FinTech, drawn to problems where a system has to see, decide, or scale. Lately that's meant mapping 12,000+ cloud resources as a data engineering intern at Georgia-Pacific, building VR training scenarios for construction safety research, and writing game-playing AI agents that reason under uncertainty. Outside class I'm part of VGDev and GT Swim Club, and I spend my free time on calisthenics, bouldering, MMA, piano, and video games. Always looking for the next thing to build.",
   // Impact stats — the number counts up when scrolled into view.
   stats: [
     { prefix: '', value: 4, suffix: '+', label: 'Years of coding experience' },
     { prefix: '', value: 2, suffix: '+', label: 'Years of AI applications' },
-    { prefix: '$', value: 100, suffix: 'K+', label: 'Cloud savings identified' },
   ] satisfies Stat[],
   // ➕ Add up to 3 photos (paths under public/, e.g. '/assets/name.jpg'). Fewer
   // than 3 leaves the remaining diamond(s) as a placeholder.
@@ -58,6 +59,17 @@ export interface Experience {
   year: string
   text: string
   tags: string[]
+  /** Optional company logo shown left of the title (path under public/, e.g.
+   *  '/assets/logo-name.svg'). Omit it and the title sits on its own. */
+  logo?: string
+  /** How to keep the mark legible on the near-black card. Leave it off for a
+   *  logo that already reads light on dark (a bright or mid-tone full-color
+   *  mark on a transparent background).
+   *  - 'invert' — flips a black / near-black single-color mark to white.
+   *  - 'plate'  — sits the logo on a light rounded tile. Use it for a dark
+   *    full-color mark, where inverting would wreck the brand colors, and for
+   *    any logo that ships with a white background instead of transparency. */
+  logoFit?: 'invert' | 'plate'
 }
 
 export const experience = {
@@ -65,24 +77,31 @@ export const experience = {
   subhead: "Where I've worked and what I've built.", // shown on mobile / reduced-motion
   scrollHint: 'Scroll to travel the timeline.', // shown under the pinned heading
   // ➕ Add a new experience: copy one block, edit it, drop it in (newest first).
+  //    Add `logo:` to show a company mark beside the title.
   items: [
     {
       title: 'Georgia-Pacific — Data Engineering Intern',
-      year: '2026',
+      year: 'May – Aug 2026',
       text: 'Built an app catalog mapping dependencies across 200+ applications, and provisioned AWS infrastructure with Terraform to automate dependency and cost extraction across 12,000+ resources — surfacing $100,000+ in potential annual cloud savings.',
       tags: ['AWS', 'Terraform', 'Python'],
+      logo: '/assets/logo-georgia-pacific.png',
+      logoFit: 'plate',
     },
     {
       title: 'Autorobotics in Construction — Undergraduate Researcher',
-      year: '2025 – Present',
+      year: 'Aug 2025 – Present',
       text: 'Researching AI and VR for construction safety and training: 6+ interactive Unity scenarios with cross-platform OpenXR support across Meta Quest, SteamVR, and Oculus, holding 90+ FPS in PC-streamed builds.',
       tags: ['Unity', 'OpenXR', 'AI'],
+      logo: '/assets/logo-vip.png',
+      logoFit: 'plate',
     },
     {
       title: 'Viet Home Care LLC — Caregiver',
-      year: '2025 – Present',
+      year: 'Jan 2025 – Present',
       text: 'Providing in-home nursing support — diet monitoring, mobility assistance, and technological aid — alongside the companionship and reliable communication that keep clients comfortable and independent.',
       tags: ['Care', 'Communication'],
+      logo: '/assets/logo-viet-home-care.png',
+      logoFit: 'plate',
     },
   ] satisfies Experience[],
 }

@@ -149,6 +149,12 @@ export default function About() {
               </span>
             ))}
           </div>
+          {about.concentration && (
+            <p className="about-conc">
+              <span className="about-conc__label">Concentration</span>
+              <span className="about-conc__value">{about.concentration}</span>
+            </p>
+          )}
           <p className="about-bio">{about.bio}</p>
           <AboutStats />
         </div>
