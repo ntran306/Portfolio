@@ -116,6 +116,11 @@ export interface Project {
    *  autoplay muted; anything else renders as an <img>. Falls back to a
    *  placeholder when omitted. */
   media?: string
+  /** How the media fills the 16:10 panel. Defaults to 'cover' — right for a
+   *  screenshot or screen recording, which should bleed to the edges. Use
+   *  'contain' for a logo or anything with its own margins, which cover would
+   *  crop into. */
+  mediaFit?: 'cover' | 'contain'
 }
 export interface ProjectCategory {
   name: string
