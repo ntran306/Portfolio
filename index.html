@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- iOS ignores this icon's alpha channel and applies its own mask, so it's
+         pre-flattened onto --bg navy rather than left transparent (see the tab
+         favicon.svg above — the NT isometric mark reads well at homescreen
+         size but turns to mush at the 16px browser tab renders). -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <title>Nathan Tran — Developer</title>
     <meta
