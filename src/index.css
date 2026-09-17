@@ -629,9 +629,17 @@ section.exp{ padding: 0; display: block; }
 .proj-orbit__text{ margin: 0; color: var(--muted); font-size: 15px; line-height: 1.6; }
 .proj-orbit__cta{ margin-top: 6px; }
 
-/* Media box — image / gif / video, or a placeholder until one is set. */
+/* Media box — image / gif / video, or a placeholder until one is set. The
+   16:10 here is only the fallback for an item with no `mediaAspect` set (e.g.
+   the placeholder below); content.ts sets the real ratio per project so the
+   box takes the shape of what's actually inside it instead of a fixed frame
+   that crops a mismatched video/screenshot/logo — see Project.mediaAspect,
+   applied as an inline style that overrides this default.
+   max-height is a safety rail: an unusually tall/square item (any AR under
+   ~1.3) would otherwise be free to grow past what looks right beside the text
+   column, so cover/contain still crop rather than the panel ballooning. */
 .proj-orbit__media{
-  position: relative; width: 100%; aspect-ratio: 16 / 10;
+  position: relative; width: 100%; aspect-ratio: 16 / 10; max-height: 380px;
   border-radius: 16px; overflow: hidden;
   border: 1px solid rgba(106,166,255,.22);
   background: radial-gradient(circle at 50% 40%, rgba(106,166,255,.10), transparent 70%), rgba(255,255,255,.02);

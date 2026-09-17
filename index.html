@@ -3,11 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- NT isometric mark, tried at actual tab size per instruction — a
+         synthetic 16px render looked illegible, but that's not the same as
+         how a real browser downscales it, and plenty of detailed tab icons
+         read fine in practice. favicon.svg (the flat N monogram, confirmed
+         legible at 16px) is still on disk if this doesn't hold up live. -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <!-- iOS ignores this icon's alpha channel and applies its own mask, so it's
-         pre-flattened onto --bg navy rather than left transparent (see the tab
-         favicon.svg above — the NT isometric mark reads well at homescreen
-         size but turns to mush at the 16px browser tab renders). -->
+         pre-flattened onto --bg navy rather than left transparent. -->
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <title>Nathan Tran — Developer</title>
