@@ -116,11 +116,16 @@ export interface Project {
    *  autoplay muted; anything else renders as an <img>. Falls back to a
    *  placeholder when omitted. */
   media?: string
-  /** How the media fills the 16:10 panel. Defaults to 'cover' — right for a
+  /** How the media fills its panel. Defaults to 'cover' — right for a
    *  screenshot or screen recording, which should bleed to the edges. Use
    *  'contain' for a logo or anything with its own margins, which cover would
    *  crop into. */
   mediaFit?: 'cover' | 'contain'
+  /** The panel's own aspect ratio (width / height), matched to this media's
+   *  real dimensions — e.g. a 960x402 video is 960/402. Defaults to 16/10 when
+   *  omitted. Set this so the panel takes the shape of what's actually in it
+   *  rather than a fixed box that crops a mismatched video/screenshot/logo. */
+  mediaAspect?: number
 }
 export interface ProjectCategory {
   name: string
@@ -143,6 +148,7 @@ export const projects = {
           tags: ['Python', 'Bayesian Inference', 'Alpha-Beta'],
           href: 'https://github.com/ntran306/Ratfinder3600',
           media: '/assets/ratfinder-demo.mp4',
+          mediaAspect: 960 / 402,
         },
       ],
     },
@@ -156,6 +162,7 @@ export const projects = {
           tags: ['Python', 'MediaPipe', 'OpenCV', 'moderngl'],
           href: 'https://github.com/ntran306/FletchFlow',
           media: '/assets/fletchflow-demo.mp4',
+          mediaAspect: 960 / 540,
         },
       ],
     },
@@ -170,6 +177,7 @@ export const projects = {
           href: 'https://github.com/ntran306/CollegeStudySite',
           media: '/assets/tutortle-logo.png',
           mediaFit: 'contain',
+          mediaAspect: 1,
         },
         {
           title: 'BuzzedIn',
@@ -178,6 +186,7 @@ export const projects = {
           tags: ['Django', 'PostgreSQL', 'REST APIs'],
           href: 'https://github.com/ntran306/GTJobSearch',
           media: '/assets/buzzedin-demo.mp4',
+          mediaAspect: 960 / 436,
         },
       ],
     },
@@ -190,6 +199,7 @@ export const projects = {
           text: 'Undergraduate research into AI and VR for construction safety and education — 6+ interactive Unity scenarios, instructional VR for an AI-guided adaptive training platform, and cross-platform OpenXR support holding 90+ FPS in PC-streamed builds.',
           tags: ['Unity', 'OpenXR', 'C#', 'AI'],
           media: '/assets/vip-screenshot.jpg',
+          mediaAspect: 1192 / 661,
         },
       ],
     },
