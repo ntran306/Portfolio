@@ -638,6 +638,12 @@ section.exp{ padding: 0; display: block; }
   box-shadow: 0 24px 60px rgba(0,0,0,.45);
 }
 .proj-orbit__media img, .proj-orbit__media video{ width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Logo variant: a mark has its own margins built in, so cover would crop into
+   it. Contain it instead and inset it off the panel edge, letting the panel's
+   own radial glow read as the backdrop. */
+.proj-orbit__media--contain img, .proj-orbit__media--contain video{
+  object-fit: contain; padding: 11%;
+}
 .proj-orbit__media-ph{
   position: absolute; inset: 0; display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 8px;

@@ -25,3 +25,11 @@ dist-ssr
 
 # Claude Code local config (machine-specific settings, plans, permissions)
 .claude/
+
+# Raw video sources (screen recordings, etc). assets-src/ otherwise keeps
+# original images for future re-crops since those cost tens of KB — but a raw
+# recording runs 10-100x that. The compressed, served copy lives in
+# public/assets/*.mp4 and IS tracked; only the multi-MB originals stay local.
+assets-src/*.mp4
+assets-src/*.mov
+assets-src/*.webm

@@ -274,7 +274,7 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
             </a>
           )}
         </div>
-        <div className="proj-orbit__media">
+        <div className={`proj-orbit__media${project.mediaFit === 'contain' ? ' proj-orbit__media--contain' : ''}`}>
           {project.media ? (
             isVideo(project.media)
               ? <video src={project.media} autoPlay loop muted playsInline />
