@@ -500,9 +500,10 @@ export default function Projects() {
                 </div>
               ))}
             </div>
-            {/* Sits outside .proj-ring so it stays put at center while the
-                ring spins past/around it, rather than spinning with it.
-                Fades out with the ring once a category opens (CSS). */}
+            {/* Sits outside .proj-ring so it stays put (positioned off the
+                wheel itself, below it) while the ring spins, rather than
+                spinning with it. Fades out with the ring once a category
+                opens (CSS). */}
             <div className="proj-wheel__hint" aria-hidden="true">
               <svg className="hint-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="1 4 1 10 7 10"/>

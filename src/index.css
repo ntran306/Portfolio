@@ -511,7 +511,7 @@ section.exp{ padding: 0; display: block; }
 }
 .proj-ring:active{ cursor: grabbing; }
 .proj-wheel.is-open .proj-ring{ opacity: 0; pointer-events: none; }
-/* Rock-and-fade hint at the wheel's center — same "here's how" role as the
+/* Rock-and-fade hint below the wheel — same "here's how" role as the
    Experience section's bobbing mouse glyph, but this wheel is drag-only (no
    scroll-wheel support, unlike the open-category dial), so a rotate icon
    reads truer than that mouse glyph would. Rocks both ways rather than
@@ -519,7 +519,7 @@ section.exp{ padding: 0; display: block; }
    outside .proj-ring (see JSX) so it doesn't spin along with it, and fades
    out with the ring once a category is open. */
 .proj-wheel__hint{
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  position: absolute; left: 50%; top: calc(100% + 18px); transform: translateX(-50%);
   color: var(--muted); pointer-events: none; transition: opacity .4s ease;
   animation: projHintRock 2.6s ease-in-out infinite;
 }
@@ -530,8 +530,8 @@ section.exp{ padding: 0; display: block; }
    same property, transition or not). */
 .proj-wheel.is-open .proj-wheel__hint{ opacity: 0; animation: none; }
 @keyframes projHintRock{
-  0%, 100%{ opacity: .35; transform: translate(-50%, -50%) rotate(-16deg); }
-  50%{ opacity: .8; transform: translate(-50%, -50%) rotate(16deg); }
+  0%, 100%{ opacity: .35; transform: translateX(-50%) rotate(-16deg); }
+  50%{ opacity: .8; transform: translateX(-50%) rotate(16deg); }
 }
 /* Minimalist line-circle: 4 arcs leaving a gap at each square */
 .proj-ring__svg{
@@ -737,7 +737,7 @@ section.exp{ padding: 0; display: block; }
 @media (prefers-reduced-motion: reduce){
   .proj-orbit, .proj-orbit__detail{ animation: none; }
   .proj-node__square, .proj-orbit__diamond{ transition: none; }
-  .proj-wheel__hint{ animation: none; opacity: .6; transform: translate(-50%, -50%); }
+  .proj-wheel__hint{ animation: none; opacity: .6; transform: translateX(-50%); }
 }
 
 /* Skills — left-rooted branching tree with a scroll-triggered choreography.
