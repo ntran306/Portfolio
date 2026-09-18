@@ -31,10 +31,27 @@ Two icon maps live in [`src/components/Skills.tsx`](src/components/Skills.tsx)
 
 ## Assets
 
-- `public/assets/` — files served as-is at `/assets/…` (resume PDF, the three
-  square About photos). Keep this lean; everything here ships to `dist/`.
-- `assets-src/` — original uncropped photos, kept for future re-crops. **Not**
-  served or deployed.
+- `public/assets/` — files served as-is at `/assets/…`: the resume PDF, the
+  three square About photos, Experience company logos, and the Tutortle logo
+  / VIP screenshot used as project media. Keep this lean; everything here
+  ships to `dist/`.
+- `assets-src/` — original, uncropped/uncompressed source files, kept for
+  future re-crops or re-exports. **Not** served or deployed — images here are
+  still committed to git (they're small), but the raw project-demo screen
+  recordings are `.gitignore`d (`assets-src/*.mp4`, `*.mov`, `*.webm`): a raw
+  recording runs 10-100x the size of an image, and committing one would bloat
+  the repo's history with no way to shrink it back short of rewriting
+  published history. Those stay local-only; back them up yourself (e.g. a
+  cloud drive) if you want the originals to survive a lost laptop.
+- Project demo **videos** are hosted on Cloudinary, not this repo — `media` in
+  `content.ts` points at `https://res.cloudinary.com/evfukudw/video/upload/…`
+  URLs for RatFinder, FletchFlow, and BuzzedIn. To replace one: export a new
+  clip, compress it (see the git log around when these were added for the
+  ffmpeg settings used — 960px wide, muted, letterboxing cropped out first if
+  the recording has any), upload it to the same Cloudinary account, and swap
+  the URL in `content.ts`. Everything else (`media` as a local `/assets/…`
+  path) still works too — Cloudinary is only used because these three demos
+  are large enough that keeping them in git stopped making sense.
 
 The About photos are pre-cropped squares (600×600) because the diamond tiles
 rotate 45°, which crops to roughly the central 70% of each image.

@@ -112,9 +112,10 @@ export interface Project {
   tags: string[]
   /** Omit when there's nothing public to link — the button hides itself. */
   href?: string
-  /** Optional image / gif / video shown beside the project. Videos (.mp4/.webm)
-   *  autoplay muted; anything else renders as an <img>. Falls back to a
-   *  placeholder when omitted. */
+  /** Optional image / gif / video shown beside the project — a local path
+   *  under public/, or a full URL (the video demos are hosted on Cloudinary;
+   *  see README). Videos (.mp4/.webm/.mov) autoplay muted; anything else
+   *  renders as an <img>. Falls back to a placeholder when omitted. */
   media?: string
   /** How the media fills its panel. Defaults to 'cover' — right for a
    *  screenshot or screen recording, which should bleed to the edges. Use
@@ -147,7 +148,7 @@ export const projects = {
           text: 'A competitive game-playing agent for the ByteFight tournament that localizes a hidden target from noisy sensor data with a Bayesian belief filter. Rebuilt a greedy baseline as alpha-beta search with transposition caching, lifting win rate against the benchmark bot from 50% to 80%+ — top 30% of 192 teams.',
           tags: ['Python', 'Bayesian Inference', 'Alpha-Beta'],
           href: 'https://github.com/ntran306/Ratfinder3600',
-          media: '/assets/ratfinder-demo.mp4',
+          media: 'https://res.cloudinary.com/evfukudw/video/upload/v1789702113/ratfinder-demo.mp4',
           mediaAspect: 960 / 402,
         },
       ],
@@ -161,7 +162,7 @@ export const projects = {
           text: 'A computer-vision archery game that uses MediaPipe hand tracking to nock, draw, and release a virtual bow. A 3-thread pipeline isolates 29 ms hand detection from the 60 FPS render loop so both hold full rate, with One Euro filtering and a debouncing gesture state machine keeping draw-and-release stable under hand jitter.',
           tags: ['Python', 'MediaPipe', 'OpenCV', 'moderngl'],
           href: 'https://github.com/ntran306/FletchFlow',
-          media: '/assets/fletchflow-demo.mp4',
+          media: 'https://res.cloudinary.com/evfukudw/video/upload/v1789702113/fletchflow-demo.mp4',
           mediaAspect: 960 / 540,
         },
       ],
@@ -185,7 +186,7 @@ export const projects = {
           text: 'A Django job-matching platform connecting Georgia Tech students with recruiters. Optimized database access to cut load time by 80%+, and integrated 5+ APIs that lifted engagement 30% through dynamic filtering and responsive UX.',
           tags: ['Django', 'PostgreSQL', 'REST APIs'],
           href: 'https://github.com/ntran306/GTJobSearch',
-          media: '/assets/buzzedin-demo.mp4',
+          media: 'https://res.cloudinary.com/evfukudw/video/upload/v1789702113/buzzedin-demo.mp4',
           mediaAspect: 960 / 436,
         },
       ],
