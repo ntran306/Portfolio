@@ -2,7 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- maximum-scale/user-scalable stop the browser's own pinch/double-tap
+         zoom from fighting the Projects wheel's custom drag-to-rotate (that
+         drag is otherwise indistinguishable from a zoom gesture to the
+         browser, which is what caused it to zoom instead of rotate on
+         mobile). iOS 10+ ignores user-scalable=no for accessibility, so
+         Projects.tsx also blocks double-tap-zoom directly on the wheel. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <!-- NT isometric mark, tried at actual tab size per instruction — a
          synthetic 16px render looked illegible, but that's not the same as
          how a real browser downscales it, and plenty of detailed tab icons
