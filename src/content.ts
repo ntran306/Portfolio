@@ -138,6 +138,10 @@ export const projects = {
   subhead: 'Expand a category to explore.',
   // ➕ Add a project inside the matching category's `projects` list.
   //    The wheel shows exactly four categories (one per compass point).
+  // ⏸ PLANNED, NOT YET DONE: merge 'AI & Algorithms' + 'Computer Vision' into
+  //    one 'AI & Computer Vision' category, and add a 'Game Development'
+  //    category — waiting on the user to supply those projects first. Stays
+  //    at 4 categories either way. Don't do this until asked.
   categories: [
     {
       name: 'AI & Algorithms',
