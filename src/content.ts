@@ -138,13 +138,9 @@ export const projects = {
   subhead: 'Expand a category to explore.',
   // ➕ Add a project inside the matching category's `projects` list.
   //    The wheel shows exactly four categories (one per compass point).
-  // ⏸ PLANNED, NOT YET DONE: merge 'AI & Algorithms' + 'Computer Vision' into
-  //    one 'AI & Computer Vision' category, and add a 'Game Development'
-  //    category — waiting on the user to supply those projects first. Stays
-  //    at 4 categories either way. Don't do this until asked.
   categories: [
     {
-      name: 'AI & Algorithms',
+      name: 'AI & Computer Vision',
       projects: [
         {
           title: 'RatFinder',
@@ -155,11 +151,6 @@ export const projects = {
           media: 'https://res.cloudinary.com/evfukudw/video/upload/v1789702113/ratfinder-demo.mp4',
           mediaAspect: 960 / 402,
         },
-      ],
-    },
-    {
-      name: 'Computer Vision',
-      projects: [
         {
           title: 'FletchFlow',
           pill: 'Solo',
@@ -168,6 +159,29 @@ export const projects = {
           href: 'https://github.com/ntran306/FletchFlow',
           media: 'https://res.cloudinary.com/evfukudw/video/upload/v1789702113/fletchflow-demo.mp4',
           mediaAspect: 960 / 540,
+        },
+      ],
+    },
+    {
+      name: 'Game Development',
+      projects: [
+        {
+          title: 'Sleighers',
+          pill: '3D Art',
+          text: 'A Christmas-themed multiplayer hero shooter built with Georgia Tech VGDev — two teams, Fir and Fae, race to fill a Cheer meter by capturing objectives across a snowbound arena. Worked as the team\'s 3D artist and animator, modeling and animating in-game assets.',
+          tags: ['3D Modeling', '3D Animation', 'Multiplayer'],
+          href: 'https://www.gtvgdev.com/games-archive/sleighers',
+          media: '/assets/sleighers.jpg',
+          mediaAspect: 960 / 540,
+        },
+        {
+          title: 'Chime',
+          pill: 'Code + Art',
+          text: 'An action roguelike with a narrative twist, built by a 23-person Georgia Tech VGDev team — fight through a ruined, monster-infested kingdom and relive its lost inhabitants\' memories through a talking bell. Split time between programming gameplay in C# and modeling 3D assets in Blender.',
+          tags: ['C#', 'Blender', '3D Modeling', 'Roguelike'],
+          href: 'https://www.gtvgdev.com/games-archive/chime',
+          media: '/assets/chime.jpg',
+          mediaAspect: 1280 / 720,
         },
       ],
     },
