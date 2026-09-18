@@ -263,6 +263,31 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
       <div className="proj-orbit__detail" key={active} style={{ '--slide': `${dir * 18}px` } as React.CSSProperties}>
         <div className="proj-orbit__detail-body">
           <h3 className="proj-orbit__name">{project.title}</h3>
+          {/* Desktop switches projects by spinning the dial — hidden there
+              entirely (see CSS) — but that dial is mobile-only-hidden too, so
+              without this a category with more than one project had no way
+              at all to reach the second one on a phone. */}
+          {N > 1 && (
+            <div className="proj-orbit__pager">
+              <button
+                type="button"
+                className="proj-orbit__pager-btn"
+                onClick={() => spinTo((active - 1 + N) % N)}
+                aria-label="Previous project"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <span className="proj-orbit__pager-count">{active + 1} / {N}</span>
+              <button
+                type="button"
+                className="proj-orbit__pager-btn"
+                onClick={() => spinTo((active + 1) % N)}
+                aria-label="Next project"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          )}
           <p className="proj-orbit__text">{project.text}</p>
           <div className="tags">{project.tags.map((t) => <span key={t} className="tag">{t}</span>)}</div>
           {/* Hidden entirely when there's nothing public to link, rather than
@@ -328,6 +353,26 @@ export default function Projects() {
     const ro = new ResizeObserver(update)
     ro.observe(el)
     return () => ro.disconnect()
+  }, [])
+
+  // touch-action: none (below) stops the wheel from being read as a one-finger
+  // pan/pinch gesture, but it can't stop a double-tap: mobile browsers
+  // recognize that from two touchend events landing close together in time,
+  // independent of touch-action, and the meta viewport's zoom lock (index.html)
+  // isn't honored on iOS 10+. Rapidly tapping a wheel that visually isn't
+  // responding is exactly what a confused user does, so this is what was
+  // reported as it "zooming in and out" while spinning didn't work.
+  useEffect(() => {
+    const el = wheelRef.current
+    if (!el) return
+    let lastTap = 0
+    const onTouchEnd = (e: TouchEvent) => {
+      const now = Date.now()
+      if (now - lastTap < 350) e.preventDefault()
+      lastTap = now
+    }
+    el.addEventListener('touchend', onTouchEnd, { passive: false })
+    return () => el.removeEventListener('touchend', onTouchEnd)
   }, [])
 
   // 4 categories → North, East, South, West.
