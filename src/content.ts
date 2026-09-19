@@ -168,8 +168,8 @@ export const projects = {
         {
           title: 'Sleighers',
           pill: '3D Art',
-          text: 'A Christmas-themed multiplayer hero shooter built with Georgia Tech VGDev — two teams, Fir and Fae, race to fill a Cheer meter by capturing objectives across a snowbound arena. Worked as the team\'s 3D artist and animator, modeling and animating in-game assets.',
-          tags: ['3D Modeling', '3D Animation', 'Multiplayer'],
+          text: 'A Christmas-themed multiplayer hero shooter built with Georgia Tech VGDev — two teams, Fir and Fae, race to fill a Cheer meter by capturing objectives across a snowbound arena. Worked as the team\'s 3D artist and animator, modeling and animating in-game assets in Blender for the Unreal Engine build.',
+          tags: ['Unreal Engine', 'Blender', '3D Modeling', '3D Animation'],
           href: 'https://www.gtvgdev.com/games-archive/sleighers',
           media: '/assets/sleighers.jpg',
           mediaAspect: 960 / 540,
@@ -177,8 +177,8 @@ export const projects = {
         {
           title: 'Chime',
           pill: 'Code + Art',
-          text: 'An action roguelike with a narrative twist, built by a 23-person Georgia Tech VGDev team — fight through a ruined, monster-infested kingdom and relive its lost inhabitants\' memories through a talking bell. Split time between programming gameplay in C# and modeling 3D assets in Blender.',
-          tags: ['C#', 'Blender', '3D Modeling', 'Roguelike'],
+          text: 'An action roguelike with a narrative twist, built by a 23-person Georgia Tech VGDev team — fight through a ruined, monster-infested kingdom and relive its lost inhabitants\' memories through a talking bell. Split time between programming gameplay in Unity and C# and modeling 3D assets in Blender.',
+          tags: ['Unity', 'C#', 'Blender', 'Git'],
           href: 'https://www.gtvgdev.com/games-archive/chime',
           media: '/assets/chime.jpg',
           mediaAspect: 1280 / 720,
