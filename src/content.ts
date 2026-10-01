@@ -170,7 +170,7 @@ export const projects = {
         {
           title: 'Sleighers',
           pill: '3D Art',
-          text: 'A Christmas-themed multiplayer hero shooter built with Georgia Tech VGDev — two teams, Fir and Fae, race to fill a Cheer meter by capturing objectives across a snowbound arena. Contributed to the 3D art team, modeling and animating the festive tommy gun in Blender for the Unreal Engine build.',
+          text: "A Christmas-themed multiplayer hero shooter from Georgia Tech's VGDev club. Two teams, Fir and Fae, fight over one snow map, decorating objectives and then holding them to fill a Cheer meter. Modeled and animated the festive tommy gun in Blender for the Unreal build.",
           tags: ['Unreal Engine', 'Blender', '3D Modeling', '3D Animation'],
           href: 'https://www.gtvgdev.com/games-archive/sleighers',
           media: [
@@ -185,7 +185,7 @@ export const projects = {
         {
           title: 'Chime',
           pill: 'Code + Art',
-          text: 'An action roguelike with a narrative twist, built by a 23-person Georgia Tech VGDev team — fight through a ruined, monster-infested kingdom and relive its lost inhabitants\' memories through a talking bell. Split time between programming gameplay in Unity and C# and modeling 3D assets in Blender.',
+          text: "An action roguelike set in Athyrium, a kingdom overrun by monsters, where a talking bell drops you into the memories of the people who lived there. Built by a VGDev team at Georgia Tech. Wrote gameplay code in C# and modeled 3D assets in Blender.",
           tags: ['Unity', 'C#', 'Blender', 'Git', 'GitHub'],
           href: 'https://www.gtvgdev.com/games-archive/chime',
           media: '/assets/chime.gif',
