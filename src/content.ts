@@ -178,7 +178,7 @@ export const projects = {
           title: 'Chime',
           pill: 'Code + Art',
           text: 'An action roguelike with a narrative twist, built by a 23-person Georgia Tech VGDev team — fight through a ruined, monster-infested kingdom and relive its lost inhabitants\' memories through a talking bell. Split time between programming gameplay in Unity and C# and modeling 3D assets in Blender.',
-          tags: ['Unity', 'C#', 'Blender', 'Git'],
+          tags: ['Unity', 'C#', 'Blender', 'Git', 'GitHub'],
           href: 'https://www.gtvgdev.com/games-archive/chime',
           media: '/assets/chime.jpg',
           mediaAspect: 1280 / 720,
