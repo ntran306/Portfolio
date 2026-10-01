@@ -30,6 +30,42 @@ function makeArcs(R: number): string[] {
    1:1 with your input — then it softlocks to the nearest project. ---------- */
 const isVideo = (src: string) => /\.(mp4|webm|mov)$/i.test(src)
 
+const SLIDE_MS = 3200 // how long each still holds before crossfading to the next
+
+/* A still, a video, or — given several stills — a slideshow that crossfades
+   between them, for a project that has screenshots but no demo footage. */
+function ProjectMedia({ media, title }: { media: string | string[]; title: string }) {
+  const shots = Array.isArray(media) ? media : [media]
+  const [shown, setShown] = useState(0)
+
+  useEffect(() => {
+    if (shots.length < 2) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const id = setInterval(() => setShown((i) => (i + 1) % shots.length), SLIDE_MS)
+    return () => clearInterval(id)
+  }, [shots.length])
+
+  if (shots.length === 1 && isVideo(shots[0])) {
+    return <video src={shots[0]} autoPlay loop muted playsInline />
+  }
+  // Stacked rather than swapped so the outgoing frame is still there to fade
+  // against — a single <img> whose src changes would blink through the panel
+  // background. Only the first is eager: the rest are a few seconds away.
+  return (
+    <>
+      {shots.map((src, i) => (
+        <img
+          key={src}
+          className={`proj-orbit__shot${i === shown ? ' is-on' : ''}`}
+          src={src}
+          alt={shots.length > 1 ? `${title} screenshot ${i + 1}` : title}
+          loading={i === 0 ? 'eager' : 'lazy'}
+        />
+      ))}
+    </>
+  )
+}
+
 function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClose: () => void }) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const dialRef = useRef<HTMLDivElement>(null)
@@ -304,9 +340,7 @@ function ProjectsOrbit({ category, onClose }: { category: ProjectCategory; onClo
           style={project.mediaAspect ? { aspectRatio: String(project.mediaAspect) } : undefined}
         >
           {project.media ? (
-            isVideo(project.media)
-              ? <video src={project.media} autoPlay loop muted playsInline />
-              : <img src={project.media} alt={project.title} loading="lazy" />
+            <ProjectMedia media={project.media} title={project.title} />
           ) : (
             <div className="proj-orbit__media-ph" aria-hidden="true">
               <span>▶</span>

@@ -693,6 +693,17 @@ section.exp{ padding: 0; display: block; }
   box-shadow: 0 24px 60px rgba(0,0,0,.45);
 }
 .proj-orbit__media img, .proj-orbit__media video{ width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Slideshow stills are stacked on top of each other and crossfaded, so the
+   panel never shows its own background between two shots. A lone still also
+   gets .proj-orbit__shot but no .is-on sibling to fade against. */
+.proj-orbit__shot{
+  position: absolute; inset: 0; opacity: 0;
+  transition: opacity .9s ease;
+}
+.proj-orbit__shot.is-on{ opacity: 1; }
+@media (prefers-reduced-motion: reduce){
+  .proj-orbit__shot{ transition: none; }
+}
 /* Logo variant: a mark has its own margins built in, so cover would crop into
    it. Contain it instead and inset it off the panel edge, letting the panel's
    own radial glow read as the backdrop. */
