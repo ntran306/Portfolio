@@ -38,7 +38,7 @@ export const about = {
   facts: ['Georgia Tech', 'CS + FinTech', 'Atlanta, GA'],
   // Shown on its own line under the facts — too long to sit in that chip row.
   concentration: 'Information Internetworks & Intelligence (AI)',
-  bio: "I'm a Computer Science student at Georgia Tech minoring in FinTech, drawn to problems where a system has to see, decide, or scale. Lately that's meant mapping 12,000+ cloud resources as a data engineering intern at Georgia-Pacific, building VR training scenarios for construction safety research, and writing game-playing AI agents that reason under uncertainty. Outside class I'm part of VGDev and GT Swim Club, and I spend my free time on calisthenics, bouldering, MMA, piano, and video games. Always looking for the next thing to build.",
+  bio: "I'm a third-year CS student at Georgia Tech. Most of what I build comes down to getting a computer to see and react: a hand-tracked archery game, VR training scenarios for a construction safety lab, game-playing agents that reason under uncertainty. This past summer I mapped 12,000+ cloud resources as a data engineering intern at Georgia-Pacific, and before that I led a tutoring platform and built a job board for Georgia Tech students. Outside class I model 3D art for VGDev and swim with GT Swim Club, and my free time goes to bouldering, calisthenics, MMA, piano, and trails. The last one was Tough Mudder. Whatever it is, I'm after the next adventure.",
   // Impact stats — the number counts up when scrolled into view.
   stats: [
     { prefix: '', value: 4, suffix: '+', label: 'Years of coding experience' },
