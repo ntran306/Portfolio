@@ -119,6 +119,9 @@ export default function About() {
           <h2>{about.heading}</h2>
         </div>
 
+        {/* Photo cluster beside the text on desktop; the wrapper is
+            display:contents below 900px, so the mobile stack is untouched. */}
+        <div className="about-grid">
         <div className="about-photos reveal" onMouseLeave={reset}>
           {SLOTS.map((n, i) => {
             const src = about.photos[i]
@@ -157,6 +160,7 @@ export default function About() {
           )}
           <p className="about-bio">{about.bio}</p>
           <AboutStats />
+        </div>
         </div>
       </div>
     </section>

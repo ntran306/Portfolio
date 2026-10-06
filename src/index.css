@@ -693,6 +693,17 @@ section.exp{ padding: 0; display: block; }
   box-shadow: 0 24px 60px rgba(0,0,0,.45);
 }
 .proj-orbit__media img, .proj-orbit__media video{ width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Slideshow stills are stacked on top of each other and crossfaded, so the
+   panel never shows its own background between two shots. A lone still also
+   gets .proj-orbit__shot but no .is-on sibling to fade against. */
+.proj-orbit__shot{
+  position: absolute; inset: 0; opacity: 0;
+  transition: opacity .9s ease;
+}
+.proj-orbit__shot.is-on{ opacity: 1; }
+@media (prefers-reduced-motion: reduce){
+  .proj-orbit__shot{ transition: none; }
+}
 /* Logo variant: a mark has its own margins built in, so cover would crop into
    it. Contain it instead and inset it off the panel edge, letting the panel's
    own radial glow read as the backdrop. */
@@ -1037,6 +1048,38 @@ section.exp{ padding: 0; display: block; }
    adds ~14px of scale plus ~13px of lift on top — so it needs ~70px of headroom
    before it starts overlapping the section title. */
 .about-photos{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; margin: 84px auto 72px; max-width: 900px; justify-items: center; }
+
+/* Two-column About (desktop only): a loose cluster of diamonds on the left,
+   left-aligned text on the right, instead of four centered bands stacked down
+   the page. The wrapper is display:contents until 900px, so every rule below
+   that width still sees .about-photos / .about-info as direct children of
+   .content-wrap and the mobile layout is exactly what it was. */
+.about-grid{ display: contents; }
+@media (min-width: 901px){
+  .about-grid{
+    display: grid; grid-template-columns: minmax(300px, 360px) 1fr;
+    gap: 64px; align-items: center; max-width: 1060px; margin: 72px auto 0;
+  }
+  .about-grid .about-photos{
+    grid-template-columns: repeat(2, 1fr); gap: 26px;
+    margin: 0; max-width: none;
+    /* headroom for the 45deg rotation + the hover lift/scale */
+    padding: 34px 10px;
+  }
+  .about-grid .photo-diamond{ width: 150px; height: 150px; }
+  .about-grid .photo-diamond:nth-child(2){ margin-top: 54px; }
+  .about-grid .photo-diamond:nth-child(3){ margin-top: -12px; }
+  .about-grid .about-info{ align-items: flex-start; text-align: left; margin-top: 0; }
+  .about-grid .about-facts,
+  .about-grid .about-conc{ justify-content: flex-start; }
+  .about-grid .about-bio{ max-width: 620px; }
+  /* Quieter than the centered hero-sized counters: these are a footer to the
+     bio, not the headline of the section. */
+  .about-grid .about-stats{ max-width: none; gap: 12px; }
+  .about-grid .stat-card{ text-align: left; padding: 14px 16px 13px; }
+  .about-grid .stat-card__n{ font-size: clamp(22px, 2.2vw, 27px); }
+  .about-grid .stat-card__label{ margin-top: 6px; letter-spacing: .1em; }
+}
 .photo-diamond{
   position: relative; width: 200px; height: 200px; transform: rotate(45deg);
   overflow: hidden; border-radius: 24px; background: rgba(255,255,255,.03);

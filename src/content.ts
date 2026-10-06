@@ -10,8 +10,8 @@ export const hero = {
   // The name sits as a small byline here — the nav already carries it, so the
   // headline leads with the work instead.
   eyebrow: 'Nathan Tran',
-  headline: 'I build things that see, learn, and scale.',
-  tagline: 'CS at Georgia Tech — data engineering, applied AI, computer vision, and XR.',
+  headline: 'I teach computers to see.',
+  tagline: 'Third-year CS at Georgia Tech. Computer vision, XR, and the occasional video game.',
 }
 
 /* ---------- Links (used by the Contact section) ---------- */
@@ -38,11 +38,14 @@ export const about = {
   facts: ['Georgia Tech', 'CS + FinTech', 'Atlanta, GA'],
   // Shown on its own line under the facts — too long to sit in that chip row.
   concentration: 'Information Internetworks & Intelligence (AI)',
-  bio: "I'm a Computer Science student at Georgia Tech minoring in FinTech, drawn to problems where a system has to see, decide, or scale. Lately that's meant mapping 12,000+ cloud resources as a data engineering intern at Georgia-Pacific, building VR training scenarios for construction safety research, and writing game-playing AI agents that reason under uncertainty. Outside class I'm part of VGDev and GT Swim Club, and I spend my free time on calisthenics, bouldering, MMA, piano, and video games. Always looking for the next thing to build.",
-  // Impact stats — the number counts up when scrolled into view.
+  bio: "I'm a third-year CS student at Georgia Tech. I like problems where a computer has to look at the real world and react to it, which is how I ended up in computer vision, XR, and games. I learn by building the thing, breaking it, and building it again. Outside class I model 3D art for VGDev and swim with GT Swim Club, and my free time goes to bouldering, calisthenics, MMA, piano, and trails. The last one was Tough Mudder. Whatever it is, I'm after the next adventure.",
+  // Impact stats — the number counts up when scrolled into view. Counts of
+  // work that exists, not years served: every one of these is checkable
+  // against the Projects and Experience sections below.
   stats: [
-    { prefix: '', value: 4, suffix: '+', label: 'Years of coding experience' },
-    { prefix: '', value: 2, suffix: '+', label: 'Years of AI applications' },
+    { prefix: '', value: 7, suffix: '', label: 'Projects built' },
+    { prefix: '', value: 6, suffix: '+', label: 'VR scenarios' },
+    { prefix: '', value: 2, suffix: '', label: 'Games with VGDev' },
   ] satisfies Stat[],
   // ➕ Add up to 3 photos (paths under public/, e.g. '/assets/name.jpg'). Fewer
   // than 3 leaves the remaining diamond(s) as a placeholder.
@@ -115,8 +118,10 @@ export interface Project {
   /** Optional image / gif / video shown beside the project — a local path
    *  under public/, or a full URL (the video demos are hosted on Cloudinary;
    *  see README). Videos (.mp4/.webm/.mov) autoplay muted; anything else
-   *  renders as an <img>. Falls back to a placeholder when omitted. */
-  media?: string
+   *  renders as an <img>. Falls back to a placeholder when omitted.
+   *  An array crossfades through the images on a timer (see SLIDE_MS in
+   *  Projects.tsx) — for a project with screenshots but no demo video. */
+  media?: string | string[]
   /** How the media fills its panel. Defaults to 'cover' — right for a
    *  screenshot or screen recording, which should bleed to the edges. Use
    *  'contain' for a logo or anything with its own margins, which cover would
@@ -138,13 +143,9 @@ export const projects = {
   subhead: 'Expand a category to explore.',
   // ➕ Add a project inside the matching category's `projects` list.
   //    The wheel shows exactly four categories (one per compass point).
-  // ⏸ PLANNED, NOT YET DONE: merge 'AI & Algorithms' + 'Computer Vision' into
-  //    one 'AI & Computer Vision' category, and add a 'Game Development'
-  //    category — waiting on the user to supply those projects first. Stays
-  //    at 4 categories either way. Don't do this until asked.
   categories: [
     {
-      name: 'AI & Algorithms',
+      name: 'AI & Computer Vision',
       projects: [
         {
           title: 'RatFinder',
@@ -155,11 +156,6 @@ export const projects = {
           media: 'https://res.cloudinary.com/evfukudw/video/upload/v1789702113/ratfinder-demo.mp4',
           mediaAspect: 960 / 402,
         },
-      ],
-    },
-    {
-      name: 'Computer Vision',
-      projects: [
         {
           title: 'FletchFlow',
           pill: 'Solo',
@@ -168,6 +164,35 @@ export const projects = {
           href: 'https://github.com/ntran306/FletchFlow',
           media: 'https://res.cloudinary.com/evfukudw/video/upload/v1789702113/fletchflow-demo.mp4',
           mediaAspect: 960 / 540,
+        },
+      ],
+    },
+    {
+      name: 'Game Development',
+      projects: [
+        {
+          title: 'Sleighers',
+          pill: '3D Art',
+          text: "A Christmas-themed multiplayer hero shooter from Georgia Tech's VGDev club. Two teams, Fir and Fae, fight over one snow map, decorating objectives and then holding them to fill a Cheer meter. Modeled and animated the festive tommy gun in Blender for the Unreal build.",
+          tags: ['Unreal Engine', 'Blender', '3D Modeling', '3D Animation'],
+          href: 'https://www.gtvgdev.com/games-archive/sleighers',
+          media: [
+            '/assets/sleighers-1.jpg',
+            '/assets/sleighers-2.jpg',
+            '/assets/sleighers-3.jpg',
+            '/assets/sleighers-4.jpg',
+            '/assets/sleighers-5.jpg',
+          ],
+          mediaAspect: 1280 / 720,
+        },
+        {
+          title: 'Chime',
+          pill: 'Code + Art',
+          text: "An action roguelike set in Athyrium, a kingdom overrun by monsters, where a talking bell drops you into the memories of the people who lived there. Built by a VGDev team at Georgia Tech. Wrote gameplay code in C# and modeled 3D assets in Blender.",
+          tags: ['Unity', 'C#', 'Blender', 'Git', 'GitHub'],
+          href: 'https://www.gtvgdev.com/games-archive/chime',
+          media: '/assets/chime.gif',
+          mediaAspect: 400 / 225,
         },
       ],
     },
