@@ -39,10 +39,13 @@ export const about = {
   // Shown on its own line under the facts — too long to sit in that chip row.
   concentration: 'Information Internetworks & Intelligence (AI)',
   bio: "I'm a third-year CS student at Georgia Tech. I like problems where a computer has to look at the real world and react to it, which is how I ended up in computer vision, XR, and games. I learn by building the thing, breaking it, and building it again. Outside class I model 3D art for VGDev and swim with GT Swim Club, and my free time goes to bouldering, calisthenics, MMA, piano, and trails. The last one was Tough Mudder. Whatever it is, I'm after the next adventure.",
-  // Impact stats — the number counts up when scrolled into view.
+  // Impact stats — the number counts up when scrolled into view. Counts of
+  // work that exists, not years served: every one of these is checkable
+  // against the Projects and Experience sections below.
   stats: [
-    { prefix: '', value: 4, suffix: '+', label: 'Years of coding experience' },
-    { prefix: '', value: 2, suffix: '+', label: 'Years of AI applications' },
+    { prefix: '', value: 7, suffix: '', label: 'Projects built' },
+    { prefix: '', value: 6, suffix: '+', label: 'VR scenarios' },
+    { prefix: '', value: 2, suffix: '', label: 'Games with VGDev' },
   ] satisfies Stat[],
   // ➕ Add up to 3 photos (paths under public/, e.g. '/assets/name.jpg'). Fewer
   // than 3 leaves the remaining diamond(s) as a placeholder.
