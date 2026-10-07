@@ -50,7 +50,7 @@ export default function Contact() {
               </div>
               <div className="form-group">
                 <label htmlFor="message">Message</label>
-                <textarea id="message" name="message" rows={5} placeholder="Tell me what's on your mind..." required ref={messageRef}></textarea>
+                <textarea id="message" name="message" rows={5} placeholder="Feel free to reach out!" required ref={messageRef}></textarea>
               </div>
               <button type="submit" className={`btn btn--primary btn--submit${loading ? ' loading' : ''}`}>
                 <span className="btn__text">Send Message</span>
